@@ -1,0 +1,180 @@
+安装虚拟机报错
+Kernel driver not installed (rc=-1908)
+
+The VirtualBox Linux kernel driver is either not loaded or not set up correctly. Please try setting it up again by executing
+This system is currently not set up to build kernel modules.
+Please install the gcc make perl packages from your distribution.
+This system is currently not set up to build kernel modules.
+Please install the gcc make perl packages from your distribution.
+
+'/sbin/vboxconfig'
+
+as root.
+
+If your system has EFI Secure Boot enabled you may also need to sign the kernel modules (vboxdrv, vboxnetflt, vboxnetadp, vboxpci) before you can load them. Please see your Linux system's documentation for more information.
+
+where: suplibOsInit what: 3 VERR_VM_DRIVER_NOT_INSTALLED (-1908) - The support driver is not installed. On linux, open returned ENOENT.
+apt install gcc make perl
+dpkg -i  xxxxx.deb
+apt-get install -f
+apt-get install linux-headers-amd64 linux-headers-4.19.0-6-amd64
+(加个sudo 试试)#/sbin/vboxconfig
+安装gcc
+
+sudo apt-get install linux-headers-$(uname -r)
+-----------------------------------------------------------------------------------------------------------------------
+安装虚拟机增强工具时报无法调节尺寸的错误时，重启虚拟机，卸载增强工具，重新插入，再次安装，解决问题
+
+GNU Linux Debian 10 MATE as Virtualbox VM – VBoxClient Failed to register resizing support rc VERR INVALID FUNCTION
+03.Apr.2021
+Administration / Server, virtualbox / Virtualization / xenserver
+the error message
+
+
+
+basically means: the VM’s screen can not be auto-resized because the VBoxGuestAdditions kernel module drivers software was not properly build & installed.
+
+the solution:
+rebuild & reinstall the VBoxGuestAdditions (kernel module) properly:
+
+hostnamectl; # tested on guest (host also being Debian 10)
+    Virtualization: oracle
+  Operating System: Debian GNU/Linux 10 (buster)
+            Kernel: Linux 4.19.0-16-amd64
+      Architecture: x86-64
+insert the /usr/share/virtualbox/VBoxGuestAdditions.iso
+
+inside the vm:
+start a terminal:
+su - root; # become root
+mkdir /virtualbox; # where to put the files
+cp -rv /media/cdrom0/* /virtualbox/; # copy the files
+update to latest, install build essentials software
+apt update
+apt install build-essential module-assistant gcc make perl dkms
+m-a prepare
+sh /virtualbox/VBoxLinuxAdditions.run; # run the compilation & installation
+the output that follows should be like
+
+after a
+shutdown -r now
+
+the vm guest resize screen function should work properly
+
+The script scrapy is installed in ‘/home/xxx/.local/bin’ which is not on PATH. Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+————————————————
+
+export PATH=/home/blime/.local/bin/:$PATH
+
+
+当然这只是暂时解决问题，下次还是不行。要想一直可以的话，就要把这句话，写到~/.zshrc或者~/.bashrc中
+写到那一个都没问题啦。
+bash的用：~/.bashrc
+zsh的用：～/.zshrc
+
+
+sudo vim ~/.zshrc 
+#把export PATH=/home/blime/.local/bin/:$PATH  放到最后
+source ~/.zshrc  
+#就好了
+
+
+source .bashrc 
+报错
+/usr/bin/python: No module named virtualenvwrapper
+virtualenvwrapper.sh: There was a problem running the initialization hooks.
+
+If Python could not import the module virtualenvwrapper.hook_loader,
+check that virtualenvwrapper has been installed for
+VIRTUALENVWRAPPER_PYTHON=/usr/bin/python and that PATH is
+
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+如何解决出现 unable to resolve host 问题
+bioinfo2011
+2018.05.25 16:11:52
+字数 124阅读 11,688
+
+Ubuntu环境，有时候执行sudo 就出现这个警告讯息:
+
+sudo: unable to resolve host abc
+
+虽然sudo 还是可以正常执行, 但是看到这样的通知还是会觉得烦，怎么去除这个警告呢？
+
+这个警告是因为系统找不到一个叫做 abc的hostname
+
+通过 修改 /etc/hosts 设定, 可以解决
+
+在127.0.0.1 localhost 后面加上主机名称(hostname) 即可:
+
+127.0.0.1 localhost abc
+
+问题解决！
+
+pip升级以后pip3无法使用
+#sudo python3 -m pip uninstall pip && sudo apt install python3-pip --reinstall
+
+
+
+
+IDENTIFICATION HAS CHANGED!”问题原因及解决方法
+原创 漠效 发布于2018-08-28 19:20:28 阅读数 15061 收藏
+展开
+前言
+
+在使用ssh的时候，我们经常会遇到下列报错：
+WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!
+
+下面介绍的就是此报错的问题原因及解决方法。
+报错
+
+这里写图片描述
+问题原因
+
+WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!
+翻译过来就是
+警告：远程主机标识已更改！
+
+此报错是由于远程的主机的公钥发生了变化导致的。
+ssh服务是通过公钥和私钥来进行连接的，它会把每个曾经访问过计算机或服务器的公钥（public key），记录在~/.ssh/known_hosts 中，当下次访问曾经访问过的计算机或服务器时，ssh就会核对公钥，如果和上次记录的不同，OpenSSH会发出警告。
+解决方法
+
+【1】删除对应ip的在known_hosts相关信息
+
+vim /.ssh/known_hosts
+————————————————
+版权声明：本文为CSDN博主「漠效」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/gx_1_11_real/article/details/82153160
+
+
+virtualenvwrapper.sh
+
+virtualenvwrapper.sh报错: There was a problem running the initialization hooks.解决
+
+由于在ubuntu环境下，将python做与python3.6做了软链接（ln -s python python3.6），并且pip也被我做了软链接，所以导致用pip安装virtualenvwrapper之后，在source启动virtualenvwrapper.sh时以及workon 虚拟环境时总是报错：
+复制代码
+
+1 ./virtualenvwrapper.sh: line 230: : command not found
+2 virtualenvwrapper.sh: There was a problem running the initialization hooks.
+3
+4 If Python could not import the module virtualenvwrapper.hook_loader,
+5 check that virtualenvwrapper has been installed for
+6 VIRTUALENVWRAPPER_PYTHON= and that PATH is
+7 set properly.
+
+复制代码
+
+这是根据提示230行的语句：
+
+1 "$VIRTUALENVWRAPPER_PYTHON" -m 'virtualenvwrapper.hook_loader' \
+
+结合错误信息与提示找到的语句，猜测应该是VIRTUALENVWRAPPER_PYTHON这里有问题，然后在virtualenvwrapper.sh文件中查找VIRTUALENVWRAPPER_PYTHON，发现了关键点：
+
+1 # Locate the global Python where virtualenvwrapper is installed.
+2 if [ "${VIRTUALENVWRAPPER_PYTHON:-}" = "" ]
+3 then
+4     VIRTUALENVWRAPPER_PYTHON="$(command \which python3)"    # 原本是写的\which python，这里贴出来的是我修改为python3后的。
+5 fi
+
+VIRTUALENVWRAPPER_PYTHON是用来(Locate the global Python where virtualenvwrapper is installed.)定位哪个python下面安装了virtualenvwrapper的。原本指定的位置是python，也就是2.7版本的。鉴于之前我使用python3.6安装的，所以此处要改成python3。然后这个错误就消失了。
+

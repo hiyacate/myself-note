@@ -1,0 +1,83 @@
+关闭相关进程：
+ps -aux | grep uwsgi | awk '{print $2}' | xargs kill -9
+
+一个常用的nginx配置如下：
+location / {
+    include uwsgi_params;
+    uwsgi_pass 127.0.0.1:3031;
+}
+这表示＂传递每一个请求给绑定到3031端口并使用uwsgi协议的服务器＂．
+--------------------------------------------------------------------------
+官网内容
+安装uwsgi
+pip3 install uwsgi
+
+#报错
+apt install uwsgi-plugin-python
+apt install uwsgi-plugin-python3
+
+ini 文件中添加
+plugins = python2
+plugins = python3
+
+第一个wsgi应用
+
+def application(env, start_response):
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    return [b"Hello World"]
+
+保存为 foobar.py
+
+将其部署在HTTP端口9090
+
+启动uWSGI来运行一个HTTP服务器/路由器
+uwsgi --http :9090 --wsgi-file foobar.py
+
+添加并发和监控
+使用 --processes 选项添加更多的进程，或者使用 --threads 选项添加更多的线程（或者可以同时添加）。
+
+uwsgi --http :9090 --wsgi-file foobar.py --master --processes 4 --threads 2
+
+这将会生成4个进程（每个进程有2个线程），一个 master 进程（在 lnc 死掉的时候会生成它们）和 HTTP路由器。
+
+导出uWSGI的内部统计数据,作为JSON导出：
+uwsgi --http :9090 --wsgi-file foobar.py --master --processes 4 --threads 2 --stats 127.0.0.1:9191
+
+部署django
+安装djano
+pip3 install django
+显示django版本
+python3 -m django version
+
+假设Django工程位于 /home/foobar/myproject;
+uwsgi --socket 127.0.0.1:3031 --chdir /home/foobar/myproject/ --wsgi-file myproject/wsgi.py --master --processes 4 --threads 2 --stats 127.0.0.1:9191
+
+使用 --chdir ,我们移到指定的目录下。在Django中，需要使用它来正确加载模块。
+
+使用.ini文件
+
+[uwsgi]
+socket = 127.0.0.1:3031
+chdir = /home/foobar/myproject/
+wsgi-file = myproject/wsgi.py
+processes = 4
+threads = 2
+stats = 127.0.0.1:9191
+
+保存为yourfile.ini
+仅需运行
+uwsgi yourfile.ini
+
+注意：报错 invalid rquest block size: 21573(max 4096)...skip
+原因：浏览器请求uwsgi的方式为http协议，而不是socket方式。所以就导致uwsgi的log文件中打出如上报错信息，把socket改为http
+
+uwsgi ini文件目录配置不支持~/ 只可以写 /home/pretty
+
+报错：
+!!! no internal routing support, rebuild with pcre support !!!
+解决方法：
+pip uninstall uwsgi
+sudo apt install libpcre3 libpcre3-dev
+pip install uwsgi
+
+?????????   uwsgi貌似不支持自己创建的文件夹，使用django-admin startproject 直接创建就不报错了

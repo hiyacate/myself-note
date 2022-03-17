@@ -1,0 +1,11 @@
+dpkg-reconfigure console-setup
+
+
+
+{7b651d0b-57ff-4369-9cde-f03edfe089ce}
+
+
+
+{e5182129-689b-4417-9456-fbe991cabfb3}
+
+VBoxManage internalcommands sethduuid win10.vdi 7b651d0b-57ff-4369-9cde-f03edfe089ce

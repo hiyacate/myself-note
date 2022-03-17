@@ -1,0 +1,24 @@
+添加/sbin到环境变量
+2012-06-07 10:50:11 panbin0054 阅读数 1075 收藏 更多
+分类专栏： Linux相关
+版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。
+本文链接：https://blog.csdn.net/panbin0054/article/details/7641071
+
+若要给系统中所有的用户都永久添加：
+
+　　在/etc/profile文件末尾添加export PATH=$PATH:/sbin
+
+　　文件修改并保持完以后，运行source etc/profile命令即可使修改操作立即生效。
+
+
+如果只给当前用户永久添加：
+
+　　在~/.bash_profile中的靠近末尾有类似这样的一行PATH=$PATH:$HOME/bin后添加:/sbin，就变成PATH=$PATH:$HOME/bin:/sbin
+
+　　文件修改并保持完以后，运行source ~/.bash_profile命令即可使修改操作立即生效。
+
+
+如果只想在本次开机过程中临时性的添加修改，下次开机就无效的话，可以：
+
+　　输入export PATH=$PATH:/sbin
+

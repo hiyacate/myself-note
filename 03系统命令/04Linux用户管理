@@ -1,0 +1,276 @@
+Linux用户和用户组
+Linux 是一个多用户分时系统
+Linux系统采用一个32位的整数记录和区分不同的用户
+这个用来区分不同用户的数字被称为User ID, 简称UID。
+Linux系统中的用户分为3类，即普通用户、根用户、系统用户。
+普通用户是指所有使用Linux系统的真实用户，这类用户可以使用用户名及密码登录系统。Linux有着极为详细的权限设置，所以一般来说普通用户只能在其家目录、系统临时目录或其他经过授权的目录中操作，以及操作属于该用户的文件。通常普通用户的UID大于500,因为在添加普通用户时，系统默认用户ID从500开始编号。
+根用户也就是root用户，它的ID是0,也被称为超级用户，root账户拥有对系统的完全控制权：可以修改、删除任何文件，运行任何命令。所以root用户也是系统里面最具危险性的用户，root用户甚至可以在系统正常运行时删除所有文件系统，造成无法挽回的灾难。
+系统用户是指指纹运行时刻必须有的用户，但并不是指真实的使用者。
+比如在RedHat或CentOS下运行网站服务时，需要使用系统用户apache来运行httpd进程，而运行MySQL数据库服务时，需要使用系统用户mysql来运行mysqld进程。在RedHat或CentOS下，系统用户的ID范围是1～499。
+每个用户至少属于一个组，也可以同时属于多个组。
+查看自己的UID和GID
+#id
+确认自己所属的用户组
+#groups
+查询当前在线用户
+#who
+
+/etc/passwd 和 /etc/shadow
+#cat /etc/passwd
+第一列 用户名    是UID的字符串标记方式，方便阅读
+第二列 密码      在旧的UNUX系统中，该字段是用户加密后的密码，现在已经不再使用，而是将密码放在/etc/shadow中，所以此处都只是一个字母x
+第三列 UID       UID系统用来区分不同用户的整数
+第四列 GID       GID系统用来区分不同用户组的整数
+第五列 说明栏    类似于“注释”，现在已经不使用
+第六列 家目录    用户登录后，所处的目录，即用户家目录
+第七列 登录Shell 用户登录后，所使用的Shell
+
+#cat /etc/shadown
+第一列 用户名                   是UID的字符串标记方式，方便阅读
+第二列 密码                     经过加密后的密码 
+第三列 密码的最近修改日         这个数字是从1970年1月1日至密码修改日的天数
+第四列 密码不可修改的天数       修改密码之后，几天内不可修改密码，如果是0,则随时可以修改
+第五列 密码重新修改的天数       考虑到密码使用一段时间后可能会泄漏，可以设置一个修改时间，在密码到期之前系统会提醒用户修改密码
+第六列 密码失效前提前警告的天数 设定密码到期前几天内开始提醒用户修改密码
+第七列 密码失效宽限天数         如果密码到期，过了见天后将会失效，无法登录系统
+第八列 账号失效日期             一般为空
+第九列 保留字段                 暂时没有使用
+
+Linux账号管理
+涉及账号的添加、删除和修改等操作
+
+新增和删除用户
+新增用户：useradd
+useradd命令用于添加新的用户。可直接在该命令后跟上新增的用户名。但是对于系统来说，完成这个命令需要在后台执行很多对用户来说毫无感知的行为。
+#useradd john
+首先，系统需要将用户信息记录在/etc/passwd中，一般会在/etc/passwd和/etc/shadow末尾追加一条记录，同时会分配给该用户一个UID。
+接着，要为该用户自动创建家目录。家目录以创建的用户名为目录名，创建的路径在/home目录中。比如，在上述案例中，创建的目录将是/home/john
+然后，复制/etc/skel下所有的文件至/home/john。说明一下，如果你使用ls -l /etc/skel命令查看，可以发现这个目录下“什么都没有”，但事实上，该目录下面有很多隐藏文件，使用ls -la /etc/skel就可以看到其中还是有好几个文件的。
+最后，新建一个与该用户名一样的用户组，也就是说当创建用户john的时候，也同时创建了一个叫john的用户组，而用户john默认属于john用户组。
+这里需要对/etc/skel目录做一些说明。系统在添加用户时，需要预先为这个用户创建一些默认的“配置文件”，而默认配置的就是/etc/skel目录下的几个隐藏文件。可以说，/etc/skel实际上是创建用户时的“模板”。
+***可以手动在/etc/skel目录下创建文件作为模板，因为创建用户后会将/etc/skel中的所有文件直接复制过来。
+在使用useradd添加用户时，系统会给该用户自动分配一个UID，但是也可以通过使用-u参数实现指定UID，当然，必须要指定的UID不与其他用户冲突才可以。
+例如：
+#useradd -u 555 user1
+使用-g 参数 指定GID
+例如：创建user2时，指定user2所属的Group是user1
+#useradd -g user2 user1
+使用 -d 参数指定家目录
+# useradd -d /home/mydir3 user3
+其它参数可使用man useradd查看
+
+修改密码：passwd
+创建用户后，该用户实际上还没有登录系统的权限，因为在不设置密码的情况下，在/etc/shadow中该用户记录中以冒号分隔的第二列将显示为两个感叹号“！！”这说明不允许该用户登录系统。因此，需要同时设置用户的密码才行，设置命令是passwd后接用户名，比如：
+#passwd john
+
+修改用户：usermod
+查看/etc/passwd 中的关于john的内容
+john /etc/passwd | grep john
+显示
+john:x:1000:1000:john,,,:/home/john:/bin/bash
+冒号隔开的第五列是用户john的家目录，如果希望修改家目录为/home/alice,可使用以下命令对john的家目录做修改：
+usermod -d /home/alice_new -m alice
+其中，-m的参数的作用是，如果指定用户的家目录存在，就自动创建新目录/home/alice,并使用该目录作为alice的新家目录。如果没有这个参数，系统会报一个错误：usermod:user/home/alice does not exist
+冻结账号
+使用-L参数实现
+usermod -L alice
+解锁账号
+使用-U参数实现
+usermod -U alice
+
+删除用户：userdel
+#userdel alice
+使用这个命令会删除alice在/etc/passwd和/etc/shadow中的记录。但是从数据安全方面考虑，默认情况下，删除用户时并不会删除原来用户的家目录和邮件信息。可以使用-r参数同时删除用户家目录和该用户的邮件。注意，一旦执行了这条命令，该用户的相关文件就会被全部删除。
+
+新增和删除用户组
+新增用户组的命令是#groupadd group1
+查看/etc/group的最后一行，group1 的GID为1001
+group1:x:x:1001
+其中第一列是用户组名，第二列代表密码，第三列代表用户组的数字ID，第四列是组成员，这里为空说明还没有任何用户属于这个组。
+
+删除用户组的命令是#groupdel
+后面接被删除的用户组名作为参数，如果已有用户属于这个试图删除的组，该操作会失败。
+#groupdel group1
+
+查看用户：users、who、w
+使用命令users可以查看当前系统有哪些用户。比如，在当前的系统中运行users命令，就会发现有两个root在当前机器上登录。实际上，Linux会把所有来自不同终端的活动定义为一个会话，从who命令的输出，可以看出root用户是通过不同的终端登录到系统中的。users命令相对比较简单所以列出的信息也比较少，可以使用命令who来看到更多信息。
+命令显示的结果有3列，第一列是登录用户的用户名，第二列是用户登录的终端，第三列是用户登录的时间。如果是通过远程网络登录，则现时会显示远程主机的主机名或IP地址。
+w命令的第一行会显示当前时间、系统运行时间、已登录的用户数量和系统负载。显示如下：
+ 15:01:25 up 28 min,  2 users,  load average: 0.00, 0.00, 0.00
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+pretty   tty7     :0               14:33     ?     3.33s  0.29s x-session-manager
+pretty   pts/0    192.168.1.8      14:48    0.00s  0.06s  0.00s w
+第一列：登录用户的用户名
+第二列：用户登录终端
+第三列：如果用户从网络登录，则显示远程主机的主机名或IP地址
+第四列：用户登录时间
+第五列：用户闲置时间
+第六列：与终端相关的当前所有运行进程消耗的CPU时间总量
+第七列：当前WHAT列所对应的进程所消耗的CPU时间问题
+每八列：用户当前运行的进程
+
+安装finger
+调查用户：finger
+finger命令在不回任何参数的情况下，同样会显示系统的登录用户，如下所示：
+Login     Name       Tty      Idle  Login Time   Office     Office Phone
+pretty    cat        tty7           Jan  6 14:33 (:0)
+pretty    cat        pts/1          Jan  6 15:46 (192.168.1.8)
+如果在finger后跟上某个用户名，则显示该用户更详细的信息，如下所示：
+Login: pretty         			Name: cat
+Directory: /home/pretty             	Shell: /bin/bash
+On since Mon Jan  6 14:33 (CST) on tty7 from :0
+On since Mon Jan  6 15:46 (CST) on pts/1 from 192.168.1.8
+   2 seconds idle
+No mail.
+No Plan.
+
+切换用户
+在使用Linux的过程中，很多时候由于实际需要可能不同的用户之间切换，比如，原本是使用普通用户登录的，但是在操作的过程中由于权限原因必须使用root用户来做一些操作，这时就需要临时切换成root用户；操作完成后，再退出切换成普通用户。其中将会涉及两种切换用户的方法：su和sudo,下面对这两种方法进行讲解。
+su命令
+su是切换用户的意思，在不回参数的情况下，su命令默认表示切换到root用户，之后只要输入root密码就可以切换身份为root了，完成操作后，使用exit命令可以退出root切换到原先的用户。如下所示：
+
+pretty@debian-v:~$ su
+Password: 
+root@debian-v:/home/pretty# pwd
+/home/pretty
+root@debian-v:/home/pretty# exit
+exit
+pretty@debian-v:~$ 
+
+su命令后面还可以加上一个“-”参数，就是键盘上的中横线。加上这个参数后，切换成root用户时，不但身份变成了root，而且不能应用root的用户环境。所谓“用户环境”就是/etc/passwd中定义的用户家目录、使用的Shell，以及关于这个用户的个性化设置等。如下所示：
+
+pretty@debian-v:~$ su -
+Password:
+root@debian-v:~# pwd
+/root
+root@debian-v:~# exit
+logout
+pretty@debian-v:~$
+
+su - 命令后还可以继续跟其他的用户名作为参数
+
+root用户可以使用su命令切换成任意用户而不需要密码
+
+使用su命令虽然很方便，但还是有明显的缺陷，就是切换成其他用户的前提是需要知道对方的密码。如果需要切换成root，那就需要root的密码。我们知道，root是系统中权限最高的用户，如果让太多人知道root密码，必然是很不安全的。为解决这个问题，我们可以使用sudo命令。
+
+用其他用户的身份执行命令：sudo
+该命令的使用方式是在sudo后跟上需要执行的命令，比如说sudo passwd user1，即使用root的身份修改user1的密码。运行该命令时，系统首先检查/etc/sudoers，判断该用户是否有执行sudo的权限，在确定有执行权限后，系统要求用户输自己的密码，如果密码输入正确，则会以root用户的身份运行passwd user1命令。
+在配置/etc/sudoers这个文件时，可以使用一些常见的编辑器，比如vi或者vim等，但是考虑到这个配置文件的重要性，Linux提供了专门编辑这个文件的方式，就是使用visudo来编辑这个文件，它的好处是可以在编辑后保存退出时自动检查语法设置，以防止不小心配置错误而造成无法使用sudo命令。
+
+pretty  ALL=(ALL:ALL) ALL
+这一行代表的意思是，john这个用户（第一列）可以从任何地方登录后（第二列的ALL）执行任何人（第三列的ALL)的任何命令（第四列的ALL）。还可以定义某一组的sudo权限，比如“%john ALL=(ALL)ALL”可以让所有属于john用户组的用户从任何地方登录后执行任何人的任何命令。
+
+正如上面例子所演示的，只需要知道自己的密码就可以使用sudo执行任何命令，这样方便多了。但是每次都需要输入一遍密码也是比较麻烦的事情，想要实现不需要输入密码就可以执行命令，可以在最后一个ALL前添加“NOPASSWD:“，如下所示：
+pretty  ALL=(ALL:ALL) NOPASSWD:ALL
+
+实际上，将最后一个参数设置为ALL是很不安全的，因为这意味着用户实际拥有了全部的系统权限，和root的权限是一致的，在工作中可以根据用户实际的工作内容定义用户可以sudo执行的命令列表。假设用户john由于工作需要，经常要重启或者关闭服务器，那么就可以进行如下设置：
+pretty  ALL=(ALL:ALL) NOPASSWD:/sbin/shutdown, /usr/bin/reboot
+
+严格来说，sudo并不是真的切换了用户，而是使用其他用户的身份和权限执行了命令。
+
+例行任务管理
+日常生活中常会有很多例行性的事情，比如说每周工作日的闹钟、每年一次的生日提醒等。还有一些事情是偶发性的，比如突然需要处理一封紧急的邮件等。在Linux中也有处理这两种任务的方法。如果任务是周期性的，其命令为cron；如果只是在某一个特定的时间执行一次，其命令为at
+
+单一时刻执行一次任务：at
+比如从现在开始，设置30分钟后自动关机，这时就可以使用at命令。
+
+pretty@debian-v:~$ at now + 30 minutes
+warning: commands will be executed using /bin/sh
+at> /sbin/shutdown -h now
+at> <EOT>
+job 3 at Wed Jan  8 21:17:00 2020
+
+其中，第一行是定义从现在开始算，30分钟后安排一个任务；第二行是到了时间后执行关机操作；第三行是个<EOT>，这不是使用键盘输入的，而是使用了组合键Ctrl+D，表示输入结束；第四行是系统提示有一个任务将在23:39被执行。可以使用atq命令查看当前使用at命令调度的任务列表，第一列是任务编号；也可以使用atrm删除已经进入任务队列的任务，再使用atq查询时，发现已经没有任务列表了，如下所示：
+pretty@debian-v:~$ atq
+4	Wed Jan  8 21:25:00 2020 a pretty
+pretty@debian-v:~$ atrm 4
+pretty@debian-v:~$ atq
+pretty@debian-v:~$ 
+
+使用at还可以安排在具体的时间执行任务，比如说在午夜12点实现自动关机，如下所示：
+
+pretty@debian-v:~$ at 00:00 2020-01-09
+warning: commands will be executed using /bin/sh
+at> /sbin/shutdown -h now
+at> <EOT>
+job 5 at Thu Jan  9 00:00:00 2020
+pretty@debian-v:~$ atq
+5	Thu Jan  9 00:00:00 2020 a pretty
+
+默认情况下，所有用户都可以使用at命令来高度自己的任务，如果由于特殊的原因需要禁止某些用户使用这个功能，可以将该用户的用户名添加至/etc/at.deny中。
+
+周期性执行任务：cron
+首先需要确定crond(在debian系统中服务名称是cron不是crond)进程在运行，如果没有运行，需要先启动该进程。
+sudo service crond start
+debian系统中该命令为：
+sudo service cron start
+
+查看运行状态
+sudo service cron status
+● cron.service - Regular background program processing daemon
+   Loaded: loaded (/lib/systemd/system/cron.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2020-01-09 09:09:57 CST; 46min ago
+     Docs: man:cron(8)
+ Main PID: 439 (cron)
+    Tasks: 1 (limit: 4689)
+   Memory: 1.0M
+   CGroup: /system.slice/cron.service
+           └─439 /usr/sbin/cron -f
+......
+......
+......
+
+用户可以通过crontab来设置自己的计划任务，并使用-e参数来编辑任务。在这之前需要先了解一下设置的“语法”，当使用crontab -e进入编辑模式时，需要编辑执行的时间和执行的命令。在下面的示例中，前面5个*可以用来定义时间，第一个*表示分钟，可以使用的值是1~59,每分钟可以使用*和*/1表示；第二个*表示小时，可以使用的值是0～23；第三个表示日期，可以使用的值是1～31；第四个*表示月份，可以使用的值是1～12；第五个*表示星期几，可以使用的值是0～6,0代表星期日最后是执行的命令。当到了设定的时间时，系统就会自动执行定义的命令，设置crontab的基本格式如下所示。
+* * * * * command
+设置crontab的语法比较难以理解，这里举一些例子，如下所示：
+* * * * * service httpd restart
+*/1 * * * * service httpd restart
+#这两种写法其实是一致的，都是分钟重启httpd进程。请注意，这只是一个例子，
+除非你有确定的目的，否则不要在实际生产环境中这么设置
+* */1 * * * service httpd restart
+#每小时重启httpd进程
+* 23-3/1 * * * service httpd restart
+#从23点开始到3点，每小时重启httpd进程
+30 23 * * * service httpd restart
+#每天晚上23点30分重启httpd进程
+30 23 1 * * service httpd restart
+#每月的第一天晚上23点30分重启httpd进程
+30 23 1 1 * service httpd restart
+#每年1月1日的晚上23点30分重启httpd进程
+30 23 * * 0 service httpd restart
+#每周日晚上23点30分重启httpd进程
+
+设置完成后，可以使用crontab -l 查看设置的任务，也可以使用crontab -r 删除所有的任务
+
+与at类似，每个用户都可以设置自己的crontab，如果由于特殊的原因需要禁止某些用户使用这个功能，可以将该用户的用户名添加至/etc/cron.deny中。除了root之外，普通用户只可以设置、查看、删除自己的计划任务，root可以使用-u参数查看指定用户的任务。比如root可以查看用户john的任务列表：
+# crontab -u john -l
+
+/etc/crontab的管理
+用户可以通过crontab -e命令来编辑定义自己的任务，事实上，系统也有自己的例行任务，而其配置文件是/etc/crontab。我们先来看一下这个文件的内容：
+pretty@debian-v:~$ cat /etc/crontab
+# /etc/crontab: system-wide crontab
+# Unlike any other crontab you don't have to run the `crontab'
+# command to install the new version when you edit this file
+# and files in /etc/cron.d. These files also have username fields,
+# that none of the other crontabs do.
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name command to be executed
+17 *	* * *	root    cd / && run-parts --report /etc/cron.hourly
+25 6	* * *	root	test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )
+47 6	* * 7	root	test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
+52 6	1 * *	root	test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
+#
+
+cron.hourly、cron.daily、cron.weekly、cron.montyly都是文件夹，文件夹中岕定义了具体的任务。
+与使用crontab -e 编辑的文件不同，“#run-parts”部分的第六列定义了以什么微分执行例行任务。这里的4个任务都是使用root来运行的。第七列定义了使用run-parts方式来运行第八列文件夹中的所有脚本。除了run-parts方式外，也可以使用命令模式运行任务，比如下面的例子就是定义了每分钟由root执行一次答应Hello的操作。
+*/1 * * * * root echo "Hello"

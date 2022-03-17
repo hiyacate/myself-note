@@ -1,0 +1,29 @@
+apt install libpq-dev python-dev
+apt install postgresql postgresql-contrib
+pip install psycopg2==2.7.4
+
+#create a user for our PostgreSQL database
+su postgres
+createuser -dP blog
+
+#create the blog database and give the ownership to the blog user you just created with the following command:
+createdb -E utf8 blog blog
+
+In order to use trigrams in PostgreSQL, you will need to install the pg_trgm extension first. Execute the following command from the shell to connect to your database:
+psql blog
+
+Then, execute the following command to install the pg_trgm extension:
+CREATE EXTENSION pg_trgm;
+
+迁移数据库数据
+pg_dump the_db_name > the_backup.sql
+然后将备份复制到开发服务器，使用以下命令恢复：
+psql the_new_dev_db < the_backup.sql
+
+
+上面命令最近一次没有成功，用下面这个 
+pg_dump -U postgres -d blog > blog.sql
+psql -U postgres -d blog < the_backup.sql
+
+重启
+/etc/init.d/postgresql restart

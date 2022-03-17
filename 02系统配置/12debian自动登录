@@ -1,0 +1,2 @@
+修改/etc/lightdm/lightdm.conf下的
+autologin-user

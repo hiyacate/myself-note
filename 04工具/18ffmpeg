@@ -1,0 +1,2 @@
+ffmpeg -i subtitle.vtt subititle.ass
+ffmpeg -i video.mp4 -vf ass=subtitle.ass out.mp4

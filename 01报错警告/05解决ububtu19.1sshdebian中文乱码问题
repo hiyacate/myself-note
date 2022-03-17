@@ -1,0 +1,3 @@
+apt install locales
+dpkg-reconfigure locales
+勾选en_US.UTF-8 zh_CN.UTF-8 

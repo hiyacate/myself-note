@@ -1,0 +1,88 @@
+#tar 解压
+tar -xvf '文件名'
+#tar 压缩
+tar -cpvf '文件名' 需要压缩的文件
+一、打包的概念
+
+         打包：指将多个文件（或目录）合并成一个文件，方便在不同节点之间传递或在服务器集群上部署。
+
+         压缩或打包文件常见扩展名       *.tar, *.tar.gz, *.gz, *.bz2, *.Z；
+
+         Linux系统一般文件的扩展名用途不大，但是压缩或打包文件的扩展名时必须的，因为linux支持的压缩命令较多，不同的压缩技术使用的压缩算法区别较大，根据扩展名能够使用对应的解压算法。
+二、tar命令
+
+1、命令作用
+
+     将文件夹打包，也能将包解开成文件夹。
+
+2、选项参数
+
+    -c：（create）建立打包文件
+
+    -t ：查看打包文件的内容含有哪些文件
+
+   -x ：解打包或解压缩的功能，可以搭配-C(大写)在特定目录解开
+
+    -j ：通过bzip2的支持进行压缩/解压缩，此时文件最好为*.tar.bz2
+
+   -z ：通过gzip的支持进行压缩/解压缩，此时文件最好为*.tar.gz
+
+   -v ：在压缩/解压缩的过程中，将正在处理的文件名显示出来
+
+   -f filename：-f 后面跟处理后文件的全名称（路径+文件名+后缀名）
+
+   -C 目录：这个选项用在解压缩，若要在特定目录解压缩，可以使用这个选项
+
+   -p：保留备份数据的原本权限与属性，常用于备份(-c)重要的配置文件
+
+   --exclude=FILE:在压缩的过程中,不要将那些文件打包
+
+   注意-c, -t, -x 不可同时出现在一串指令列中。
+
+
+3、案例
+
+      案例1：在/tmp文件夹下创建demo文件夹，将/etc目录拷贝到/tmp/demo目录里，然后打包压缩成gz格式，要求显示压缩详情。
+
+      1)在/tmp文件夹下创建demo文件夹，将/etc目录拷贝到/tmp/demo目录里。
+
+      
+
+      注意：拷贝非空目录要加 -r 
+
+       2）将etc文件夹打包压缩成gz格式，并显示压缩详情。
+
+        tar -czvf 打包压缩后文件   被打包压缩的文件夹
+
+[root@ied01 demo]# tar -czvf myetc.tar.gz etc
+
+ 如果打包压缩成.bz2格式，那么tar命令的参数：-cjvf。
+
+      案例2：先删除etc目录，解压缩myetc.tar.gz到当前目录。
+
+            1）删除etc目录
+
+[root@ied01 demo]# rm -rf etc
+
+             2）解压缩myetc.tar.gz到当前目录
+
+[root@ied01 demo]# tar -xzvf myetc.tar.gz
+
+      案例3：将myetc.tar.gz解压缩到指定目录：/home。
+
+[root@ied01 demo]# tar -xzvf myetc.tar.gz -C /home
+
+       案例4：仅仅解压缩myetc.tar.gz里的某个目录，例如etc/udev。 
+
+          1）先删除etc目录
+
+[root@ied01 demo]# rm -rf etc
+
+         2）解压缩myetc.tar.gz里的etc/udev目录
+
+[root@ied01 demo]# tar -xzvf myetc.tar.gz etc/udev
+
+
+————————————————
+版权声明：本文为CSDN博主「祸兮福所倚」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/qq_38175730/article/details/82855333

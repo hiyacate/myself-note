@@ -1,0 +1,4 @@
+apt install idle3
+
+virtualenv下的idle使用
+python -m idlelib.idle

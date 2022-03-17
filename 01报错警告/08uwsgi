@@ -1,0 +1,4 @@
+no request plugin is loaded, you will not be able to manage requests.
+you may need to install the package for your language of choice, or simply load it with --plugin.
+
+apt install uwsgi-plugin-python3

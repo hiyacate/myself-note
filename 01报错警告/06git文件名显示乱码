@@ -1,0 +1,38 @@
+通过git diff命令对前后两次commit版本进行差异化的对比，中文名的文件显示为乱码。
+git diff HEAD^ HEAD --name-only
+
+  "pcsim/testcase/2018/01/\345\210\206\346\224\225\206\265\368\210\210\224\257\350.txt"
+  "pcsim/testcase/2018/01/\345\210\206\346\224\257\346\265\213\350\257\225.txt"
+
+git diff接受的编码格式为utf-8，而文件名是以gb2312格式编写的，所以git diff显示了乱码。
+
+解决办法有以下两种：
+1）执行以下命令，修改core.quotepath配置：
+  git config --global core.quotepath false
+
+  core.quotepath设为false的话，就不会对编码大于0x80的字符进行quote。中文显示正常。
+
+2）通过vim编辑器，将文件名另存为utf-8格式。
+————————————————
+版权声明：本文为CSDN博主「hanlizhong85」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/hanlizhong85/article/details/80642571
+
+git- win10 cmd git log 中文乱码 解决方法
+原创 sunpro518 最后发布于2018-07-30 12:28:22 阅读数 5260 收藏
+展开
+
+在win10中，用cmd或者bash中使用git时候，经常遇到乱码问题，网上类似的教程很多，一般可以直接在cmd/bash中输入如下设置命令：
+
+git config --global core.quotepath false
+git config --global gui.encoding utf-8
+git config --global i18n.commit.encoding utf-8
+git config --global i18n.logoutputencoding utf-8
+export LESSCHARSET=utf-8
+
+这样设置完后，当前命令窗口是没问题的。但是，另打开一个还是不行。然后就想到应该是最后一句的问题。这一个并没有将这个变量保存起来。所以，就直接将最后一个变量添加到Windows环境变量中：
+环境变量
+OK，没问题了！
+实验过程如下：
+————————————————
+版权声明：本文为CSDN博主「sunpro518」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/sunjinshengli/article/details/81283009

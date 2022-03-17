@@ -1,0 +1,27 @@
+对apt使用代理
+echo "Acquire::socks:://proxy "socks5://127.0.0.1:1081"; > /etc/apt/apt.conf.d/12proxy
+
+终端下的替换命令
+sed -i 's/原字符串/新客串/g'
+
+pip.conf
+## Note, this file is written by cloud-init on first boot of an instance
+## modifications made here will not survive a re-bundle.
+###
+[global]
+index-url=http://mirrors.aliyun.com/pypi/simple/
+
+[install]
+trusted-host=mirrors.aliyun.com
+
+#pip收集依赖导入到requirements.txt文件中，然后执行pip install -r requirements.txt 进行安装这些依赖, 用于移动项目等情况下使用
+pip freeze > requirements.txt
+
+
+pip install pip -U
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+如果您到 pip 默认源的网络连接较差，临时使用本镜像站来升级 pip：
+
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pip -U
+

@@ -1,0 +1,81 @@
+Getting Started with Web Components
+
+Build modular and reusable components using HTML, CSS and JavaScript
+
+Preface
+This book covers information about a web technology called Web Components. Web components are web specifications that provide the user with a component-driven methodology for development. It also Provides encapsulation and allows you to use a component-driven methodology whithout any dependencies.
+
+Welcome to the world of Web Components.
+Web Components, as the name indicates, are components that can be reused across different sections of a website by keeping encapsulation in check. They can even be published on the web, and be used by another site with the help of a simple import. This book covers all there is to know about Web Components. What they are made up of, how they can be used and in what scenarios. The book also covers wide variety of moderate and advanced level concepts such as good practices and integrating Web Components with other technologies.
+
+In this chapter, we will talk about what Web Components are and how we can identify them while browsing various sites. We will also be talking about the specifications that make up Web Components along with detailed examples. You will be understand what custom elements are and how you can create one on your own. You will be able to encapsulation your Web Compnents with the help of a shadow DOM, and you will be able to use templates to achieve reusability.
+
+While this chapter talks only about the basics of Web Components, by the end of this chapter you will be able to create your own Web Components from scratch, and understand the specifications associated with them.
+
+In this chapter, we will cover the following topics:
+
+Web Components
+Web Component specifications
+
+Technical requirements
+
+In order to run the code, you will need a simple server, say a Python SimpleHTTPServer. In order to see the code on the browser, first start the server. On Mac, use the following command:
+
+|py -m SimpleHTTPServer
+
+On Windows, use the following command in the folder that you have code:
+
+|py -m http.server
+
+and then you can simple go to localhost:8080. It will run index.html for you in the folder.
+
+Web Components
+
+Web Components specification
+A Web Component Specification has the following parts:
+Custom element: The ability to create custom HTML tags and make sure that the browser understands how to use this HTML tag
+Shadow DOM: The ability to encapsulate the contents of the component from other parts of the DOM
+Template: Being able to create a reusable DOM structure that can be modified on the fly and output desired results 
+
+These three specifications, when used together, provide a way to create a custom HTML tag that can output desired results(DOM structure) and let it encapsulate from the page, making it reusable again and again.
+
+Now that we know these specifications and what they do, let's dive into them individually and try to look at their JavaScript APIs.
+
+Custom elements
+
+A custom element specification lets you create a custom HTML tag that can be used as its own HTML tag on the page. In order to achieve this, we need to first write a class with the functionalities associated with that THML element, and then we need to register it so that the browser understands what whis HTML tag is, and how it can be used on the page.
+
+If you are someone who is new to the concept of classes in JavaScript, here is how you can create a class:
+class myClass{
+    constructor(){
+        // do stuff
+    }
+}
+
+Pretty simple, right? Let's use the same class structure to create our custom element class, say Hello world:
+class HelloWorld extends HTMLElement{
+    constructor(){
+        //var important
+        //needed in every constructor
+        //which extends another class
+        super();
+
+        //do magic here
+        this.innerText = 'Hello World';
+    }
+}
+
+In the preceding code, our custom element class is called HelloWorld and it is extending interface from the HTMLElement class, which represents how an HTML element should work on a page. So, HelloWorld now knows what click events are, what CSS is, and so on, simply by extending HTMLElement.
+
+Inside this class, we have the constructor() method, which gets called as soon as a noew instance of this class is created. The super() function needs to be called in order to correctly instantiate the properties of the extended calss.
+
+The preceding code simply creates the element class definition. We still need to register this element. We can do so by writing the following code:
+
+customElements.define('hello-world', HelloWorld);
+
+What it does is register the class HelloWorld by defining it using the define() interface in the customElements interface; hello-world is the name of the custom element that is going to be available on the page.
+
+Once this is defined, you can used the custom element by simply writing the HTML tag as following:
+<hello-world><hello-world>
+
+When this code is run on a browser, it will render the text, Hello World.

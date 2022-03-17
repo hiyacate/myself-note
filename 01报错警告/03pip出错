@@ -1,0 +1,9 @@
+使用pip时出现TypeError: 'module' object is not callable 错误
+
+TypeError: 'module' object is not callable 错误
+
+error一般是更新pip出错后出现这个情况，导致环境中出现了两个版本的pip
+解决：
+运行python -m pip uninstall pip
+卸载一个pip就可以了
+

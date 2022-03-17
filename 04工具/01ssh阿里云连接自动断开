@@ -1,0 +1,23 @@
+服务器连接之后，老是一段时间没有操作，就自动断开连接。
+这是因为服务器设置了连接断开的时间，修改即可。
+
+$ vim /etc/ssh/sshd_config
+
+找到下面两行
+1#lientAliveInterval 0
+2#ClientAliveCountMax 3
+
+去掉注释，改成
+
+1ClientAliveInterval 30
+2ClientAliveCountMax 86400
+
+这两行的意思分别是
+
+1、客户端每隔多少秒向服务发送一个心跳数据
+
+2、客户端多少秒没有相应，服务器自动断掉连接
+
+重启sshd服务
+$ service sshd restart
+

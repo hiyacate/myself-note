@@ -1,0 +1,47 @@
+显示日期:date
+$ date
+增加参数调整命令显示内容
+显示年月日
+$ date +%Y%m%d
+
+显示目录内容:ls
+$ ls
+ls -ln 显示UID和GID
+
+total 40
+drwxr-xr-x 2 cat cat 4096 Dec 23 14:13 Desktop
+drwxr-xr-x 3 cat cat 4096 Dec 25 12:27 Documents
+drwxr-xr-x 2 cat cat 4096 Dec 25 15:52 Downloads
+drwxr-xr-x 5 cat cat 4096 Dec 25 19:34 Envs
+drwxr-xr-x 2 cat cat 4096 Dec 23 14:13 Music
+drwxr-xr-x 3 cat cat 4096 Dec 24 11:04 Pictures
+drwxr-xr-x 4 cat cat 4096 Dec 25 19:21 Projects
+drwxr-xr-x 2 cat cat 4096 Dec 23 14:13 Public
+drwxr-xr-x 2 cat cat 4096 Dec 23 14:13 Templates
+drwxr-xr-x 2 cat cat 4096 Dec 23 14:13 Videos
+第一列第一个字母d，表明文件是个目录
+可以增加参数，比如
+ls -l Desktop
+
+显示文件内容：cat
+
+获得帮助
+使用man page
+输入man
+man -f 查询要找的命令存在于哪些man文件中。
+例如
+man -f reboot
+显示如下：
+reboot (8)           - Halt, power-off or reboot the machine
+reboot (2)           - reboot or enable/disable Ctrl-Alt-Del
+可以输入
+man 2 reboot
+或者
+man 8 reboot
+来分别查看 reboot 命令在man文件的第二章和第八章中的解释
+
+使用info page
+info工具是一个基于菜单的超文本系统，包括少许Linux Shell、工具、命令的说明文档。比如可以在命令行中输入info ls 来显示ls命令的说明文档
+debian10下info工具需要安装
+
+在/usr/share/doc中，有大量的帮助和说明文档

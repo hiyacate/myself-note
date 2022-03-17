@@ -1,0 +1,212 @@
+efibootmgr
+UEFI用来替代传统BIOS引导操作系统，学会修改UEFI启动项也变得十分重要，UEFI全称为：“统一的可扩展固件接口”（Unified Extensible Firmware Interface），目前新购入的计算机都支持UEFI固件，若是需要启动传统MBR设备，则需开启CSM（Compatibility Support Module）。关闭CSM则变成纯UEFI启动，且完全支持安全启动。Secure Boot（安全启动），安全启动仅适用于使用UEFI启动的操作系统。如果电脑要启动不完全支持UEFI的设备，就必须关闭Secure Boot，然后打开CSM。如Win7系统，必须开启CSM兼容模式。Windows8及以上都能很好的支持UEFI，而为了设置系统引导，必须要管理UEFI启动项。
+
+在国内个人物理机直接安装Linux系统时，一般都会再安装个Windows系统实现双系统，这样有时候就会出现系统启动项丢失的情况多为Linux系统
+
+解决方法就是使用efibootmgr命令添加启动项，而在Windows下可以使用EasyUEFI这个软件。
+
+1、如果系统丢失Linux启动项，如果是双系统就只能进入Windows，但是我不喜欢用EasyUEFI，这时可以选择一个Linux liveCD系统，如Ubuntu，
+将Ubuntu liveCD 刻录成U盘启动，如果刻录成光驱启动系统会很慢。
+
+2、在Ubuntu（非liveCD）下我使用efibootmgr命令，显示如下：
+
+pipci@ubuntu:~$ efibootmgr
+BootCurrent: 0012
+Timeout: 0 seconds
+BootOrder: 0012,0010,0011,000F,000B,000A,0006,0007,0008,0009,000C,000D,000E
+Boot0000  Setup
+Boot0001  Boot Menu
+Boot0002  Diagnostic Splash Screen
+Boot0003  Lenovo Diagnostics
+Boot0004  Rescue and Recovery
+Boot0005  Startup Interrupt Menu
+Boot0006* USB CD
+Boot0007* USB FDD
+Boot0008* ATAPI CD0
+Boot0009* ATAPI CD1
+Boot000A* ATA HDD0
+Boot000B* ATA HDD1
+Boot000C* ATA HDD2
+Boot000D* USB HDD
+Boot000E* PCI LAN
+Boot000F* Windows Boot Manager
+Boot0010* ubuntu
+Boot0011* ubuntushim
+Boot0012* opensuse-secureboot
+pipci@ubuntu:~$
+
+
+列表还是很直观的显示了当前启动项，启动超时，EFI启动顺序，0012是第一启动项对应的是opensuse系统，0011是第二启动项对应ubuntu系统这个是我手动添加的，
+000F是四启动项对应的Windows系统。
+
+3、查找系统启动文件，每个系统都会在EFI分区建立自己的启动文件。
+
+pipci@ubuntu:~$ sudo fdisk -l      #产看EFI所在分区
+
+设备           Start    末尾    扇区  Size 类型
+/dev/sdb1       2048    206847    204800  100M EFI System                   #EFI所在分区                  
+/dev/sdb2     206848    468991    262144  128M Microsoft reserved
+/dev/sdb3     468992  83888127  83419136 39.8G Microsoft basic data
+/dev/sdb4   83888128  92276735   8388608    4G Microsoft basic data
+/dev/sdb5   92276736 176168959  83892224   40G Microsoft basic data
+/dev/sdb6  176168960 254294015  78125056 37.3G Linux filesystem
+/dev/sdb7  254294016 262682623   8388608    4G Linux filesystem
+/dev/sdb8  262682624 468860927 206178304 98.3G Microsoft basic data
+pipci@ubuntu:~$
+
+4、挂在EFI分区
+
+pipci@ubuntu:~$ sudo mount /dev/sdb1 /mnt/      #挂载EFI分区到/mnt目录
+
+5、进入EFI分区
+pipci@ubuntu:~$ cd /mnt/
+bash: cd: /mnt/: 权限不够
+pipci@ubuntu:~$ sudo -i                #以root用户身份运行一个登录 shell
+root@ubuntu:~# cd /mnt/
+
+6、产出EFI分区
+root@ubuntu:/mnt# ls
+EFI
+
+7、进入EFI目录，查看
+
+root@ubuntu:/mnt# cd EFI/
+root@ubuntu:/mnt/EFI# ls
+Boot  Microsoft  opensuse  ubuntu           #可以看出安装的系统
+root@ubuntu:/mnt/EFI#
+
+8、查看EFI下各目录内容：
+root@ubuntu:/mnt/EFI# ls Boot/
+bootx64.efi
+root@ubuntu:/mnt/EFI# ls Microsoft/
+Boot
+root@ubuntu:/mnt/EFI# ls opensuse/
+boot.csv  grub.cfg  grub.efi  grubx64.efi  MokManager.efi  shim.efi
+root@ubuntu:/mnt/EFI# ls ubuntu/
+fw  fwupx64.efi  grub.cfg  grubx64.efi  mmx64.efi  shimx64.efi
+root@ubuntu:/mnt/EFI#
+
+9、添加启动项
+
+root@ubuntu:~# efibootmgr -c -w -L "BootOptionName" -d /dev/sda -p 1 -l \\EFI\\Boot\\bootx64.efi
+
+其中BootOptionName替换成你设定的名字，-d后面是启动分区所在的硬盘（默认为/dev/sda），-p后面是分区位置（默认为1），-l是启动efi文件的路径。
+这样就添加了EFI启动项。
+举例：
+root@ubuntu:~# efibootmgr -c -w -L "BootOptionName" -d /dev/sdb -p 1 -l \\EFI\\Boot\\bootx64.efi    #我的启动分区所在的硬盘为/dev/sdb
+BootCurrent: 0012
+Timeout: 0 seconds
+BootOrder: 0013,0012,0010,0011,000F,000B,000A,0006,0007,0008,0009,000C,000D,000E
+Boot0000  Setup
+Boot0001  Boot Menu
+Boot0002  Diagnostic Splash Screen
+Boot0003  Lenovo Diagnostics
+Boot0004  Rescue and Recovery
+Boot0005  Startup Interrupt Menu
+Boot0006* USB CD
+Boot0007* USB FDD
+Boot0008* ATAPI CD0
+Boot0009* ATAPI CD1
+Boot000A* ATA HDD0
+Boot000B* ATA HDD1
+Boot000C* ATA HDD2
+Boot000D* USB HDD
+Boot000E* PCI LAN
+Boot000F* Windows Boot Manager
+Boot0010* ubuntu
+Boot0011* ubuntushim
+Boot0012* opensuse-secureboot
+Boot0013* BootOptionName
+
+通过上面的操作可以看出已经添加了 BootOptionName这个启动项，编号是0013,BootOrder:处可以看出已经成为第一启动项。
+
+如果是Linux系统启动项丢失不要添加/EFI/Boot/bootx64.efi这个启动项，因为这个文件可能被Windows系统替换，添加后会直接进入Windows系统，
+不能进入GRUB引导程序，可以尝试添加/EFI/opensuse/ 目录下的grubx64.efi  grub.efi  shim.efi MokManager.efi 等文件，每个Linux发行版
+对应的目录下的文件可能不一样，根据实际情况添加，我的电脑安装了3个系统，安装顺序为Windows Ubuntu openSUSE，所以要添加最后安装的那个
+系统对应的启动文件，因为最后安装的系统的GRUB才会把前面系统添加进去，才可以通过一个GRUB管理多个系统。
+
+10、删除启动项的命令为：
+
+root@ubuntu:~# efibootmgr -b 0013 -B      #删除刚才添加的BootOptionName启动项，对应的编号为0013
+BootCurrent: 0012
+Timeout: 0 seconds
+BootOrder: 0012,0010,0011,000F,000B,000A,0006,0007,0008,0009,000C,000D,000E
+Boot0000  Setup
+Boot0001  Boot Menu
+Boot0002  Diagnostic Splash Screen
+Boot0003  Lenovo Diagnostics
+Boot0004  Rescue and Recovery
+Boot0005  Startup Interrupt Menu
+Boot0006* USB CD
+Boot0007* USB FDD
+Boot0008* ATAPI CD0
+Boot0009* ATAPI CD1
+Boot000A* ATA HDD0
+Boot000B* ATA HDD1
+Boot000C* ATA HDD2
+Boot000D* USB HDD
+Boot000E* PCI LAN
+Boot000F* Windows Boot Manager
+Boot0010* ubuntu
+Boot0011* ubuntushim
+Boot0012* opensuse-secureboot
+
+11、删除多余的启动项从新查看启动项：
+root@ubuntu:~# efibootmgr
+BootCurrent: 0012
+Timeout: 0 seconds
+BootOrder: 0012,0010,0011,000F,000B,000C,000D
+Boot0000  Setup
+Boot0001  Boot Menu
+Boot0002  Diagnostic Splash Screen
+Boot0003  Lenovo Diagnostics
+Boot0004  Rescue and Recovery
+Boot0005  Startup Interrupt Menu
+Boot000B* ATA HDD1
+Boot000C* ATA HDD2
+Boot000D* USB HDD
+Boot000F* Windows Boot Manager
+Boot0010* ubuntu
+Boot0011* ubuntushim
+Boot0012* opensuse-secureboot
+
+12、修改boot 顺序
+root@ubuntu:~# efibootmgr -o 0012,0010,0011,000F,000D,000C,000B    
+BootCurrent: 0012
+Timeout: 0 seconds
+BootOrder: 0012,0010,0011,000F,000D,000C,000B
+Boot0000  Setup
+Boot0001  Boot Menu
+Boot0002  Diagnostic Splash Screen
+Boot0003  Lenovo Diagnostics
+Boot0004  Rescue and Recovery
+Boot0005  Startup Interrupt Menu
+Boot000B* ATA HDD1
+Boot000C* ATA HDD2
+Boot000D* USB HDD
+Boot000F* Windows Boot Manager
+Boot0010* ubuntu
+Boot0011* ubuntushim
+Boot0012* opensuse-secureboot
+root@ubuntu:~#
+
+通过efibootmgr -o 命令将000B和000D调换，如果要设置第一启动，把相应的编号放到命令后的最前面，如上面的0012
+
+
+wmctrl
+重新调整窗口大小
+使用wmctrl设置：
+
+若要列出窗口，请执行以下操作：
+
+$ wmctrl -l
+0x00c00003 -1 rgamble-desktop Bottom Expanded Edge Panel
+0x00c00031 -1 rgamble-desktop Top Expanded Edge Panel
+0x00e00022 -1 rgamble-desktop Desktop
+0x0260007c  0 rgamble-desktop Google - Mozilla Firefox
+
+根据窗口标题调整窗口大小：
+
+wmctrl -r Firefox -e 0,0,0,640,480
+
+“调整大小”选项的参数为gravity,X,Y,width,height因此，这将把窗口放在屏幕的左上角，并将其调整到640x480。

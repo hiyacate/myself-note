@@ -1,0 +1,10 @@
+about cannot import six
+pip install six
+
+cannot import name 'python_2_unicode_compatiable' from 'django.utils.encoding
+
+解决：
+from django.utils.six import python_2_unicode_compatible
+instead of
+from django.utils.encoding import python_2_unicode_compatible
+and let me know if this works.

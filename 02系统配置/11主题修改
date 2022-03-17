@@ -1,0 +1,48 @@
+GRUB2主题包手动安装设置及其简易修改
+http://tieba.baidu.com/p/4196513782
+
+
+#第一步 : 复制GRUB2主题包到/boot/grub/themes
+#因为涉及修改系统文件，用root身份，终端操作设置。
+#（Ubuntu开终端, Ctrl + Alt + T)
+#第一个命令， 在/boot/grub里创建GRUB2打主题目录themes
+sudo mkdir -p /boot/grub/themes/mytheme
+
+#复制GRUB2-themes_20151204主题包文件到目录/boot/grub/themes 
+sudo cp -an ~/桌面/GRUB2-themes_20151204/* /boot/grub/themes
+
+
+#第二步：修改GRUB配置文件并更新。
+
+#本楼为 Ubuntu 14.04版 15.10版 修改办法，其它Linux版本点看楼下。
+
+#打开/etc/grub.d/00_header文件
+sudo gedit /etc/grub.d/00_header
+
+#在开头注释后添加
+# 注意这个GRUB_GXMODE分辨率要看你的显示器，量力而行。
+
+
+GRUB_THEME="/boot/grub/themes/Elegant-GRUB2-master/theme.txt"
+GRUB_GFXMODE="1920X1080X32"
+
+
+
+#第三步：#更新GRUB
+sudo update-grub
+
+
+
+Arch等其它发行版本点GRUB2设置。
+第一步安装一样
+/×××××××××××××××××××××××××××××××/
+#打开/etc/default/grub文件，添加下面这句
+#选哪个主题包，就加哪个路径点theme.txt文件。
+
+GRUB_THEME=/boot/grub/themes/Elegant-GRUB2-master/theme.txt
+
+#更新grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+
+

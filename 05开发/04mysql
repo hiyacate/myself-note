@@ -1,0 +1,948 @@
+install mysql
+官网上下载deb，文件用于添加库
+之后执行
+sudo apt install -y mysql-community-server
+用于安装
+上边这个方法太慢
+上清华源添加deb
+之后 
+sudo apt install mysql-server
+
+使用apt仓库安装
+从http://dev.mysql.com/downloads/repo/apt/下载mysql apt 仓库
+或者
+wget "https://repo.mysql.com//mysql-apt-config_0.8.9-1.deb"
+
+然后
+dpkg -i mysql-apt-config_0.8.9-1_all.deb
+选择mysql服务器和集群
+想要更改发行版执行以下
+dpkg-reconfigure mysql-apt-config
+更新
+apt update
+安装
+apt install -y mysql-community-server
+
+now it is replaced by :apt install -y mysql-cluster-community-server
+验证
+ii 表示软件包已安装
+dpkg -l | grep -i mysql
+
+使用deb包安装
+mysql-community-server:数据库服务器和相关工具
+mysql-community-client:Mysql客户端应用程序和工具
+mysql-community-common:服务器和客户端库的公共文件
+mysql-community-devel:开发mysql数据库客户端应用程序的头文件和库，例如PerlMySQL模块
+mysql-community-libs:某些语言和应用程序需要动态加载和使用Mysql的共享库(libmysqlclient.so*)
+mysql-couumnity-libs-compat:旧版本的共享库，如果你安装了与旧版本mysql动态链接的应用程序，但希望在不破坏库依赖关系的情况下升级到当前版本，请安装此程序包
+从mysql下载页面http://dev.mysql.com/downloads/mysql下载mysql apt tar;
+wget
+"https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-server_8.0.3-rc-1ubuntu16.04_amd64.deb-bundle.tar"
+
+tar -xvf mysql-server_8.0.3-rc-1ubuntu16.04_amd64.deb-bundle.tar
+安装依赖关系。如果尚未安装libaio1包，则可能需要安装它
+apt install -y libaio1
+将libstdc++6升级到最新版本
+apt upgrade -y libstdc++6
+将libmecab2升级到最新版本。如果不包含universe则将下面的代码添加到文件的末尾
+vim /etc/apt/sources.list
+deb http://us.archive.ununtu.com/unumtu zesty main universe
+apt update
+apt install libmecab2
+配置
+dpkg-preconfigure mysql-community-server_*.deb
+安装 
+dpkg -i mysql-{common, community-client-core, community-client, client,
+community-server-core, community-server, server}_*.deb
+安装共享库
+dpkg -i libmysqlclient21_8.0.1-dmr-1ununtu16.10_amd64.deb
+验证
+dpkg -l | grep -i mysql
+
+
+启动或停止mysql8的运行
+使用服务
+shell> sudo service mysql start
+使用init.d
+shell> sudo /etc/init.d/mysql start
+如果你没有找到启动脚本（当执行二进制安装时），则可以从解压的位置进行复制。
+shell> sudo cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
+如果你的安装包含systemd支持:
+shell> sudo systemctl start mysqld
+如果不支持systemd,可以使用mysqld_safe启动mysql。mysqld_safe是mysqld的启动脚本，用于保护mysqld进程。如果mysqld被杀死，mysqld_safe会尝试再次启动该进程：
+shell> sudo mysqld_safe --user=mysql &
+启动后的状态和要做的操作如下。
+服务器已初始化
+ssl证书和密钥文件在数据库目录生成
+validate_password插件已安装并启用
+创建超级用户root' @ 'localhost。超级用户的密码被设置并存储在error log文件中（不适用于二进制安装）。要显示它，请使用以下命令：
+shell> sudo grep "temporary password" /var/log/mysqld.log
+你可以使用该临时密码连接到mysql
+
+停止mysql服务器的运行
+1.使用service:
+shell> sudo service mysqld stop
+2.使用init.d:
+shell> sudo /etc/init.d/mysql stop
+3.如果你安装包含systemd支持:
+shell> sudo systemctl stop mysqld
+4.使用mysqladmin:
+shell> mysqladmin -u root -p shutdown
+
+检查mysql服务器的状态
+1.使用service:
+shell> sudo systemctl status mysqld
+2.使用init.d:
+shell> sudo /etc/init.d/mysql status
+3.如果你的安装包含systemd支持：
+shell> sudo systemctl status mysqld
+
+连接mysql客户端
+shell> mysql -h localhost -P 3306 -u <username> -p<password>
+shell> mysql--host=localhost--port=3306 --user=root --password=<password>
+shell> mysql--host localhost--port 3306 --user=root --password=<password>
+shell> mysql --host=localhost --port=3306 --user=root --password
+-P参数，用于指定端口
+-p参数，用于指定密码
+-p参数后没有空格
+对于密码，=后没有空格
+1.查看当前用户：
+shell> whoami
+2.要断开连接，请按Ctrl+D组合键或键入exit:
+mysql> ^DBye
+或使用：
+mysql> exit;
+Bye
+连接到mysql提示符后，可以执行以分隔符结尾的命令。默认分隔符是分号（;）：
+mysql> SELECT 1;
++---+
+| 1 |
++---+
+| 1 |
++---+
+1 row in set (0.00 sec)
+
+4.要撤销命令，请按Ctrl+C组合键或键入\c:
+mysql> SELECT ^C
+mysql> SELECT \c
+
+创建数据库
+在任何关系数据库管理系统(RDBMS)中，数据都是存储在“行”中，这是数据库的基本构建单元。行包含可以存储多组值的列。
+数据集如下：
+customer id=1, first_name=Mike, last_name=Christensen, country=USA
+customer id=2, first_name=Andy, last_name=Hollands, country=Australia
+customer id=3, first_name=Ravi, last_name=Vedantam, country=India
+customer id=4, first_name=Rajiv, last_name=Perera, country=Sri Lanka
+你可以把这些数据保存到行中，例如：（1,'Mike', 'Christensen', 'USA')......,由4列(id、first_name、last_nameand和country)描述，存储在一个表中。表中可以容纳的列数必须在创建表的时候定义，这也是RDBMS的主要局限。虽然我们可以随时更改表的定义，介更改的同时整个表都需要重新构建。在某些情况下，表在被修改时将不可用。
+数据库是许多表的集合，而数据库服务器可以容纳许多这样的数据库。逻辑关系如下：
+数据库服务器>数据库>表（由列定义）>行
+数据库和表称为数据库对象。任何操作（如创建、修改或册子删除数据库对象）都称为数据定义语言(DDL)操作。
+数据按某种蓝图组织构建数据库（分为数据库和表），这种数据的组织形式被称为schema。
+如何操作
+连接到MySQL服务器
+pretty@debian-v:~$ mysql -u root -p
+Enter password: 
+
+mysql> CREATE DATABASE company;
+mysql> CREATE DATABASE `my.contacts`;
+反向记字符（`）用于引用标识符，如数据库和表名。当数据库包含特殊字符，如句点（.）时，需要使用反标记字符。
+你可以在不同数据库之间切换：
+mysql> USE company
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> USE my.contacts
+Database changed
+
+通过在命令行中指定数据库，可以直接连接到你想要连接的数据库，无须切换：
+pretty@debian-v:~$ mysql -u root -p company
+Enter password: 
+
+要查找连接到了哪个数据库，请使用以下命令：
+mysql> SELECT DATABASE();
++------------+
+| DATABASE() |
++------------+
+| company    |
++------------+
+1 row in set (0.00 sec)
+
+要查找你有权访问的所有数据库，请使用：
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| company            |
+| information_schema |
+| my.contacts        |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+6 rows in set (0.01 sec)
+
+数据库被创建为目录中的一个目录。基于仓库安装的默认数据目录是/var/lib/mysql,如果是通过二进制文件安装的，数据目录则是/usr/local/mysql/data/。可以通过执行下列操作获知当前的数据目录：
+mysql> SHOW VARIABLES LIKE 'datadir';
++---------------+-----------------+
+| Variable_name | Value           |
++---------------+-----------------+
+| datadir       | /var/lib/mysql/ |
++---------------+-----------------+
+1 row in set (0.00 sec)
+
+创建表
+在表中定义列时，应该指定列的名称、数据类型（整型、浮点型、字符串等）和默认值（如果有的话）。MySQL支持各种数据类型。
+1.数字：TINYINT、SMALLINT、MEDIUMINT、INT、BIGINT和BIT。
+2.浮点数：DECIMAL、FLOAT和DOUBLE。
+3.字符串：CHAR、VARCHAR、BINARY、VARBINARY、BLOB、TEXT、ENUM和SET。
+4.Spatial 数据类型
+
+检查数据目录内的文件：
+pretty@debian-v:~$ sudo ls -lhtr /var/lib/mysql/
+total 165M
+-rw-r----- 1 mysql mysql  48M Feb  9 13:58  ib_logfile1
+drwxr-x--- 2 mysql mysql 4.0K Feb  9 13:58  performance_schema
+-rw-r----- 1 mysql mysql   56 Feb  9 13:59  auto.cnf
+-rw-r--r-- 1 mysql mysql 1.1K Feb  9 13:59  ca.pem
+-rw------- 1 mysql mysql 1.7K Feb  9 13:59  ca-key.pem
+-rw------- 1 mysql mysql 1.7K Feb  9 13:59  server-key.pem
+-rw-r--r-- 1 mysql mysql 1.1K Feb  9 13:59  server-cert.pem
+-rw------- 1 mysql mysql 1.7K Feb  9 13:59  client-key.pem
+-rw-r--r-- 1 mysql mysql 1.1K Feb  9 13:59  client-cert.pem
+-rw-r--r-- 1 mysql mysql  452 Feb  9 13:59  public_key.pem
+-rw------- 1 mysql mysql 1.7K Feb  9 13:59  private_key.pem
+drwxr-x--- 2 mysql mysql 4.0K Feb  9 13:59  mysql
+drwxr-x--- 2 mysql mysql 4.0K Feb  9 13:59  sys
+-rw-r----- 1 mysql mysql  503 Feb  9 14:00  binlog.000001
+-rw-r----- 1 mysql mysql  178 Feb  9 14:14  binlog.000002
+-rw-r----- 1 mysql mysql  178 Feb  9 14:15  binlog.000003
+-rw-r----- 1 mysql mysql  178 Feb  9 14:34  binlog.000004
+-rw-r----- 1 mysql mysql  178 Feb  9 17:34  binlog.000005
+drwxr-x--- 2 mysql mysql 4.0K Feb  9 18:14  my@002econtacts
+-rw-r----- 1 mysql mysql  580 Feb  9 19:28  binlog.000006
+-rw-r----- 1 mysql mysql  529 Feb  9 21:58  binlog.000007
+-rw-r----- 1 mysql mysql  178 Feb 10 16:26  binlog.000008
+drwxr-x--- 2 mysql mysql 4.0K Feb 10 19:19  company
+-rw-r----- 1 mysql mysql 1.1K Feb 10 21:57  binlog.000009
+-rw-r----- 1 mysql mysql  178 Feb 14 21:36  binlog.000010
+-rw-r----- 1 mysql mysql  178 Feb 17 09:38  binlog.000011
+-rw-r----- 1 mysql mysql  935 Feb 17 11:16  binlog.000012
+-rw-r----- 1 mysql mysql 3.4K Feb 17 11:16  ib_buffer_pool
+drwxr-x--- 2 mysql mysql 4.0K Feb 17 13:38 '#innodb_temp'
+-rw-r----- 1 mysql mysql  12M Feb 17 13:38  ibtmp1
+-rw-r----- 1 mysql mysql  208 Feb 17 13:39  binlog.index
+-rw-r----- 1 mysql mysql    4 Feb 17 13:39  debian-v.pid
+-rw-r----- 1 mysql mysql  10M Feb 17 13:39  undo_002
+-rw-r----- 1 mysql mysql  24M Feb 17 13:39  mysql.ibd
+写入符号-rw-r----- 1 mysql mysql  471 Feb 17 13:49  binlog.000013
+-rw-r----- 1 mysql mysql  10M Feb 17 13:49  undo_001
+-rw-r----- 1 mysql mysql  12M Feb 17 13:49  ibdata1
+-rw-r----- 1 mysql mysql  48M Feb 17 13:49  ib_logfile0
+
+如何操作
+这些表包含列定义：
+mysql> CREATE TABLE IF NOT EXISTS `company`.`customers`(
+    -> `id` int unsigned AUTO_INCREMENT PRIMARY KEY,
+    -> `first_name` varchar(20),
+    -> `last_name` varchar(20),
+    -> `country` varchar(20)
+    -> ) ENGINE=InnoDB;
+Query OK, 0 rows affected, 1 warning (0.14 sec)
+其中 的 选项 解释 如下。 
+● 句点 符号： 表 可以 使用 database. table 引用。 如果已经连接到数据库，则可以简单地使用customers而不是company.customers。
+● IF NOT EXISTS： 如果存在一个具有相同名字的表，并且你指定了这个子句，MySQL只会抛出一个警告，告知表已经存在。否则，MySQL将抛出一个错误。 
+● id：它被声明为一个整型数，因为它只包含整型数。除此之外，还有两个关键字，AUTO_INCREMENT和PRIMARY KEY。
+● AUTO_INCREMENT:自动生成线性递增序列，因此不必担心为每一行的id分配值。
+● PRIMARY KEY: 每行都由一个非空的UNIQUE列标识。只有一列应该在表中定义。如果一个表包含AUTO_INCREMENT列，则它会被视为PRIMARY KEY。
+● first_name、last_name和country:它们包含字符串、因此它们被定义为varchar。
+● Engine: 与列定义一起，还应该指定存储引擎。一些类型的存储引擎包括InnoDB、MyISAM、FEDERTED、BLACKHOLE、CSV和MEMORY。
+在所有引擎中，InnoDB是唯一的事务引擎，也是默认引擎。
+要列出所有存储引擎，请执行以下操作：
+mysql> SHOW ENGINES\G
+*************************** 1. row ***************************
+      Engine: FEDERATED
+     Support: NO
+     Comment: Federated MySQL storage engine
+Transactions: NULL
+          XA: NULL
+  Savepoints: NULL
+*************************** 2. row ***************************
+      Engine: MEMORY
+     Support: YES
+     Comment: Hash based, stored in memory, useful for temporary tables
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 3. row ***************************
+      Engine: InnoDB
+     Support: DEFAULT
+     Comment: Supports transactions, row-level locking, and foreign keys
+Transactions: YES
+          XA: YES
+  Savepoints: YES
+*************************** 4. row ***************************
+      Engine: PERFORMANCE_SCHEMA
+     Support: YES
+     Comment: Performance Schema
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 5. row ***************************
+      Engine: MyISAM
+     Support: YES
+     Comment: MyISAM storage engine
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 6. row ***************************
+      Engine: MRG_MYISAM
+     Support: YES
+     Comment: Collection of identical MyISAM tables
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 7. row ***************************
+      Engine: BLACKHOLE
+     Support: YES
+     Comment: /dev/null storage engine (anything you write to it disappears)
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 8. row ***************************
+      Engine: CSV
+     Support: YES
+     Comment: CSV storage engine
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 9. row ***************************
+      Engine: ARCHIVE
+     Support: YES
+     Comment: Archive storage engine
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+9 rows in set (0.00 sec)
+
+你可以在一个数据库中创建多张表。
+创建另一张表来跟踪付款进度：
+mysql> CREATE TABLE `company`.`payments`(
+    -> `customer_name` varchar(20) PRIMARY KEY,
+    -> `payment` float
+    -> );
+要列出所有表，请使用：
+mysql> SHOW TABLES;
++-------------------+
+| Tables_in_company |
++-------------------+
+| customers         |
+| payments          |
++-------------------+
+2 rows in set (0.00 sec)
+要查看表结构，请执行以下操作：
+mysql> SHOW CREATE TABLE customers\G
+*************************** 1. row ***************************
+       Table: customers
+Create Table: CREATE TABLE `customers` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(20) DEFAULT NULL,
+  `last_name` varchar(20) DEFAULT NULL,
+  `country` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+1 row in set (0.00 sec)
+
+或使用下面的语句：
+mysql> DESC customers;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | int unsigned | NO   | PRI | NULL    | auto_increment |
+| first_name | varchar(20)  | YES  |     | NULL    |                |
+| last_name  | varchar(20)  | YES  |     | NULL    |                |
+| country    | varchar(20)  | YES  |     | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+4 rows in set (0.01 sec)
+
+MySQL会在数据目录内创建.ibd文件：
+root@debian-v:~# ls -lhtr /var/lib/mysql/company/
+total 160K
+-rw-r----- 1 mysql mysql 112K Feb  9 21:46 customers.ibd
+-rw-r----- 1 mysql mysql 112K Feb 10 19:02 payments.ibd
+
+克隆表结构
+你可以将一个表的结构克隆到新表中：
+mysql> CREATE TABLE new_customers LIKE customers;
+Query OK, 0 rows affected (0.05 sec)
+
+可以验证表结构：
+mysql> DESC new_customers;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | int unsigned | NO   | PRI | NULL    | auto_increment |
+| first_name | varchar(20)  | YES  |     | NULL    |                |
+| last_name  | varchar(20)  | YES  |     | NULL    |                |
+| country    | varchar(20)  | YES  |     | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+或使用：
+mysql> SHOW CREATE TABLE new_customers\G
+*************************** 1. row ***************************
+       Table: new_customers
+Create Table: CREATE TABLE `new_customers` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(20) DEFAULT NULL,
+  `last_name` varchar(20) DEFAULT NULL,
+  `country` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+1 row in set (0.00 sec)
+
+插入、更新和删除行
+INSERT、UPDATE、DELETE和SELECT操作称为数据操作语言（DML）语句。INSERT、UPDATE和DELETE也称为写操作，或者简称为写（write）。SELECT是一个读操作，简称（read）。
+如何操作
+插入
+INSERT语句用于在表中创建新记录：
+mysql> INSERT IGNORE INTO `company`.`customers`(first_name,
+    -> last_name,country)
+    -> VALUES
+    -> ('Mike','Christensen','USA'),
+    -> ('Andy','Hollands','Australia'),
+    -> ('Ravi','Vedantam','India'),
+    -> ('Rajiv','Perera','Sri Lanka');
+或者可以明确地写出id列，如果你想插入特定的id:
+mysql> INSERT IGNORE INTO `company`.`customers`(id,first_name,
+    -> last_name,country)
+    -> VALUES
+    -> (1,'Mike','Christensen','USA'),
+    -> (2,'Andy','Hollands','Australia'),
+    -> (3,'Ravi','Vedantam','India'),
+    -> (4,'Rajiv','Perera','Sri Lanka');
+Query OK, 0 rows affected, 4 warnings (0.00 sec)
+Records: 4  Duplicates: 4  Warnings: 4
+
+IGNORE：如果该行已经存在，并给出了IGNORE子句，则新数据将被忽略，INSERT语句仍然会执行成功，同时生成一个警告和重复数据的数目。反之，如果未给出IGNORE子句，则INSERT语句会生成一条错误信息。行的唯一性由主键标识：
+mysql> SHOW WARNINGS;
++---------+------+-------------------------------------------------+
+| Level   | Code | Message                                         |
++---------+------+-------------------------------------------------+
+| Warning | 1062 | Duplicate entry '1' for key 'customers.PRIMARY' |
+| Warning | 1062 | Duplicate entry '2' for key 'customers.PRIMARY' |
+| Warning | 1062 | Duplicate entry '3' for key 'customers.PRIMARY' |
+| Warning | 1062 | Duplicate entry '4' for key 'customers.PRIMARY' |
++---------+------+-------------------------------------------------+
+4 rows in set (0.00 sec)
+
+更新
+UPDATE语句用于修改表中的现有记录：
+mysql> UPDATE customers SET first_name='Rajiv', country='UK' WHERE id=4; Query OK, 1 row affected (0.27 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+WHERE:这是用于过滤的子句。在WHERE子句后指定的任何条件都会用于过滤，被筛选出来的行都会被更新。
+
+WHERE子句是强制性的。如果没有给出它，UPDATE会更新整个表。建议在事务中修改数据，以便在发现任何错误时轻松地回滚这些更改。
+
+删除
+删除记录可按如下方式完成：
+mysql> DELETE FROM customers WHERE id=4 AND first_name='Rajiv';
+Query OK, 1 row affected (0.32 sec)
+
+WHERE子句是强制性的。如果没有给出它，DELETE将删除表中的所有行。建议在事务中修改数据，以便在发现任何错误时轻松地回滚更改。
+
+REPLACE、INSERT、ON DUPLICATE KEY UPDATE
+在很多情况下，我们需要处理重复项。行的唯一性由主键标识。如果行已经存在，则REPLACE会简单地删除行并插入新行;如果行不存在，则REPLACE等同于INSERT。
+如果你想在行已经存在的情况下处理重复项，则需要使用ON DUPLICATE KEY UPDATE。如果指定了ON DUPLICATE KEY UPDATE选项，并且INSERT语句在PRIMARY KEY中引发了重复值，则MySQL会用新值更新已有行。
+假设你希望每次从同一客户那里收到付款后更新之前的金额，并且在客户首次付款时插入新记录，那么你需要定义一个金额栏，并在每次收到新付款时进行更新：
+mysql> REPLACE INTO customers VALUES (1,'Mike','Christensen','America');
+Query OK, 2 rows affected (0.23 sec)
+可以看到有两行受到影响，一个重复行被删除，一个新行被插入：
+mysql> INSERT INTO payments VALUES('Mike Christensen', 200) on DUPLICATE KEY
+    -> UPDATE payment=payment+VALUES(payment);
+Query OK, 1 row affected (0.30 sec)
+
+mysql> INSERT INTO payments VALUES('Ravi Vedantam', 500) ON DUPLICATE KEY
+    -> UPDATE payment=payment+VALUES(payment);
+Query OK, 1 row affected (0.50 sec)
+
+当Mike Christensen下次支付300美元时，将更新该行并将此金额添加到以前的金额中：
+mysql> INSERT INTO payments VALUES('Mike Christensen', 300) ON DUPLICATE KEY
+    -> UPDATE payment=payment+VALUES(payment);
+Query OK, 2 rows affected (0.39 sec)
+VALUES (payment):指INSERT语句中给出的值，payment指的是表中的列。
+TRUNCATING TABLE
+删除整个表需要很长时间，因为MySQL需要逐行执行操作。删除表的所有行（保留表结构）的最快方法是使用TRUNCATE TABLE语句。
+TRUNCATING TABLE是MySQL中的DDL操作，也就是说一旦数据被清空，就不能被回滚：
+mysql> TRUNCATE TABLE customers;
+Query OK, 0 rows affected (3.14 sec)
+
+加载示例数据
+你已经创建了schema（数据库和表）以及一些数据（通过INSERT、UPDATE和DELETE）。为了解释后面的内容，我们需要更多的数据。MySQL提供了一个示例employee数据库和大量的数据供我们学习使用。现在讨论如何获取这些数据并将其存储在我们的数据库中。
+下载：
+wget 'https://codeload.github.com/datacharmer/test_db/zip/master' -O master.zip
+解压：
+unzip master.zip
+导入：
+pretty@debian-v:~/Downloads/test_db-master$ cd test_db-master/
+pretty@debian-v:~/Downloads/test_db-master$ mysql -u root -p < employees.sql 
+Enter password: 
+INFO
+CREATING DATABASE STRUCTURE
+INFO
+storage engine: InnoDB
+INFO
+LOADING departments
+INFO
+LOADING employees
+INFO
+LOADING dept_emp
+INFO
+LOADING dept_manager
+INFO
+LOADING titles
+INFO
+LOADING salaries
+data_load_time_diff
+00:04:25
+
+验证数据：
+pretty@debian-v:~/Downloads/test_db-master$ mysql -u root -p employees -A
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12
+Server version: 8.0.19 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> SHOW TABLES;
++----------------------+
+| Tables_in_employees  |
++----------------------+
+| current_dept_emp     |
+| departments          |
+| dept_emp             |
+| dept_emp_latest_date |
+| dept_manager         |
+| employees            |
+| salaries             |
+| titles               |
++----------------------+
+8 rows in set (0.00 sec)
+
+mysql> DESC employees\G
+*************************** 1. row ***************************
+  Field: emp_no
+   Type: int
+   Null: NO
+    Key: PRI
+Default: NULL
+  Extra: 
+*************************** 2. row ***************************
+  Field: birth_date
+   Type: date
+   Null: NO
+    Key: 
+Default: NULL
+  Extra: 
+*************************** 3. row ***************************
+  Field: first_name
+   Type: varchar(14)
+   Null: NO
+    Key: 
+Default: NULL
+  Extra: 
+*************************** 4. row ***************************
+  Field: last_name
+   Type: varchar(16)
+   Null: NO
+    Key: 
+Default: NULL
+  Extra: 
+*************************** 5. row ***************************
+  Field: gender
+   Type: enum('M','F')
+   Null: NO
+    Key: 
+Default: NULL
+  Extra: 
+*************************** 6. row ***************************
+  Field: hire_date
+   Type: date
+   Null: NO
+    Key: 
+Default: NULL
+  Extra: 
+6 rows in set (0.00 sec)
+
+mysql> DESC employees;
++------------+---------------+------+-----+---------+-------+
+| Field      | Type          | Null | Key | Default | Extra |
++------------+---------------+------+-----+---------+-------+
+| emp_no     | int           | NO   | PRI | NULL    |       |
+| birth_date | date          | NO   |     | NULL    |       |
+| first_name | varchar(14)   | NO   |     | NULL    |       |
+| last_name  | varchar(16)   | NO   |     | NULL    |       |
+| gender     | enum('M','F') | NO   |     | NULL    |       |
+| hire_date  | date          | NO   |     | NULL    |       |
++------------+---------------+------+-----+---------+-------+
+6 rows in set (0.00 sec)
+
+查询数据
+我们已经在表中插入并更新数据，现在讨论如何从创建的示例employee数据库中检索数据。
+
+如何操作
+从employee数据库的departments表中选择所有数据。可以使用星号(*)从表中选择所有列。如果只选择你需要的数据，则不建议使用(*)：
+mysql> SELECT*FROM departments;
++---------+--------------------+
+| dept_no | dept_name          |
++---------+--------------------+
+| d009    | Customer Service   |
+| d005    | Development        |
+| d002    | Finance            |
+| d003    | Human Resources    |
+| d001    | Marketing          |
+| d004    | Production         |
+| d006    | Quality Management |
+| d008    | Research           |
+| d007    | Sales              |
++---------+--------------------+
+9 rows in set (0.00 sec)
+
+选择列
+假设你需要dept_manager的emp_no和dept_no列：
+mysql> SELECT emp_no, dept_no FROM dept_manager;
++--------+---------+
+| emp_no | dept_no |
++--------+---------+
+| 110022 | d001    |
+| 110039 | d001    |
+| 110085 | d002    |
+| 110114 | d002    |
+| 110183 | d003    |
+| 110228 | d003    |
+| 110303 | d004    |
+| 110344 | d004    |
+| 110386 | d004    |
+| 110420 | d004    |
+| 110511 | d005    |
+| 110567 | d005    |
+| 110725 | d006    |
+| 110765 | d006    |
+| 110800 | d006    |
+| 110854 | d006    |
+| 111035 | d007    |
+| 111133 | d007    |
+| 111400 | d008    |
+| 111534 | d008    |
+| 111692 | d009    |
+| 111784 | d009    |
+| 111877 | d009    |
+| 111939 | d009    |
++--------+---------+
+24 rows in set (0.00 sec)
+
+计数
+从employees表中查找员工的数量：
+mysql> SELECT COUNT(*) FROM employees;
++----------+
+| COUNT(*) |
++----------+
+|   300024 |
++----------+
+1 row in set (0.02 sec)
+
+条件过滤
+找到first_name为Georgi且last_name为Facello的员工的emp_no:
+mysql> SELECT emp_no FROM employees WHERE first_name='Georgi' AND
+    -> last_name='Facello';
++--------+
+| emp_no |
++--------+
+|  10001 |
+|  55649 |
++--------+
+2 rows in set (0.07 sec)
+
+所有的过滤条件都是通过WHERE子句给出的，除整型数和浮点数之外，其他所有内容都应放在引号内。
+
+操作符
+MySQL支持使用许多操作符来筛选结果，下面的例子将详细解释LIKE和RLIKE操作符。
+equality:参考前面使用=进行过滤的例子。
+IN：检查一个值是否在一组值中。
+例如，找出姓氏为Christ、Lamba或Baba的所有员工的人数：
+mysql> SELECT COUNT(*) FROM employees WHERE last_name IN ('Christ',
+    -> 'Lamba','Baba');
++----------+
+| COUNT(*) |
++----------+
+|      626 |
++----------+
+1 row in set (0.07 sec)
+
+BETWEEN... AND:检查一个值是否在一个范围内。
+例如，找出1986年12月入职的员工人数：
+mysql> SELECT COUNT(*) FROM employees WHERE hire_date BETWEEN 
+    -> '1986-12-01' AND '1986-12-31';
++----------+
+| COUNT(*) |
++----------+
+|     3081 |
++----------+
+1 row in set (0.06 sec)
+
+NOT:你可以简单地用NOT运算符来否定结果。
+例如，找出不是在1986年12月入职的人数：
+mysql> SELECT COUNT(*) FROM employees WHERE hire_date NOT BETWEEN
+    -> '1986-12-01' AND '1986-12-31';
++----------+
+| COUNT(*) |
++----------+
+|   296943 |
++----------+
+1 row in set (0.06 sec)
+
+简单模式匹配
+可以使用LIKE运算符来实现简单模式匹配。使用下划线（_）来精准匹配一个数量的字符，使用（%）来匹配任意数量的字符。
+找出名字以Christ开关的所有员工的人数：
+mysql> SELECT COUNT(*) FROM employees WHERE first_name LIKE 'christ%ed';
++----------+
+| COUNT(*) |
++----------+
+|      228 |
++----------+
+1 row in set (0.05 sec)
+
+找出名字中包含sri的所有员工的人数：
+mysql> SELECT COUNT(*) FROM employees WHERE first_name LIKE '%sri%';
++----------+
+| COUNT(*) |
++----------+
+|      253 |
++----------+
+1 row in set (0.08 sec)
+
+找到名字以er结尾的所有员工的人数：
+mysql> SELECT COUNT(*) FROM employees WHERE first_name LIKE '%er';
++----------+
+| COUNT(*) |
++----------+
+|     5388 |
++----------+
+1 row in set (0.07 sec)
+
+找出名字以任意两个字符开头、后面跟随ka、再后面跟随任意数量字符的所有员工的人数：
+mysql> SELECT COUNT(*) FROM employees WHERE first_name LIKE '__ka%';
++----------+
+| COUNT(*) |
++----------+
+|     1918 |
++----------+
+1 row in set (0.07 sec)
+
+正则表达式
+表达式          描述
+*           零次或多次重复
++           一个或多个重复
+？          可选字符
+.           任何字符
+\.          区间
+^           以......开始
+$           以......结束
+[abc]       只有a、b、或c
+[^abc]      非a,非b,亦非c
+[a-z]       字符a到z
+[0-9]       字符a到9
+^...$       开始和结束
+\d          任何数字
+\D          任何非数字字符
+\s          任何空符
+\S          任何非空白字符
+\w          任何字母数字字符
+\W          任何非字母数字字符
+{m}         m次重复
+{m,n}       m到n次重复
+
+找出名字以Christ开关的所有员工的人数:
+mysql> SELECT COUNT(*) FROM employees WHERE first_name RLIKE '^Christ';
++----------+
+| COUNT(*) |
++----------+
+|     1157 |
++----------+
+1 row in set (0.92 sec)
+
+找出名字以ba结尾的所有员工的人数：
+mysql> SELECT COUNT(*) FROM employees WHERE last_name RLIKE 'ba$';
++----------+
+| COUNT(*) |
++----------+
+|     1008 |
++----------+
+1 row in set (0.12 sec)
+
+查找姓氏不包含元音(a、e、i、o和u）的所有员工的人数：
+mysql> SELECT COUNT(*) FROM employees WHERE last_name NOT REGEXP '[aeiou]';
++----------+
+| COUNT(*) |
++----------+
+|      148 |
++----------+
+1 row in set (0.13 sec)
+
+限定结果
+查询hire_date在1986年之前的任何10名员工的姓名。可以在查询语句末尾使用LIMIT子句来实现此查询：
+mysql> SELECT first_name, last_name FROM employees WHERE hire_date < '1986-01-01' LIMIT 10;
++------------+------------+
+| first_name | last_name  |
++------------+------------+
+| Bezalel    | Simmel     |
+| Sumant     | Peac       |
+| Eberhardt  | Terkki     |
+| Otmar      | Herbst     |
+| Florian    | Syrotiuk   |
+| Tse        | Herber     |
+| Udi        | Jansch     |
+| Reuven     | Garigliano |
+| Erez       | Ritzmann   |
+| Premal     | Baek       |
++------------+------------+
+10 rows in set (0.00 sec)
+
+使用表别名
+默认情况下，SELECT子句中给出的任何列都将显示在结果中。在前面的示例中，我们已经得出了统计数值，但它显示为COUNT(*)。你可以使用别名来更改COUNT(*)：
+
+mysql> SELECT COUNT(*) AS count FROM employees WHERE hire_date BETWEEN '1986-12-01' AND '1986-12-31';
++-------+
+| count |
++-------+
+|  3081 |
++-------+
+1 row in set (0.06 sec)
+
+对结果排序
+可以根据列或别名列对结果进行排序，也可以用DESC指定按降序或用ASC指定按升序来排序。默认情况下，排序将按照升序进行。你可以将LIMIT子句与ORDER BY结合使用以限定结果集。
+如何操作
+查找薪水最高的前5名员工编号
+mysql> SELECT emp_no, salary FROM salaries ORDER BY salary DESC LIMIT 5;
++--------+--------+
+| emp_no | salary |
++--------+--------+
+|  43624 | 158220 |
+|  43624 | 157821 |
+| 254466 | 156286 |
+|  47978 | 155709 |
+| 253939 | 155513 |
++--------+--------+
+5 rows in set (0.68 sec)
+
+你可以在列上使用 GROUP BY 子句对结果进行分组，然后使用AGGREGATE（函数），例如COUNT、MAX、MIN和AVERAGE。还可以在group by子句中的列上使用函数。请参考下面的SUM示例，其中用到了YEAR()函数。
+如何操作
+COUNT
+1.分别找出男性和女性员工的人数：
+mysql> SELECT gender, COUNT(*) AS count FROM employees GROUP BY gender;
++--------+--------+
+| gender | count  |
++--------+--------+
+| M      | 179973 |
+| F      | 120051 |
++--------+--------+
+2 rows in set (0.14 sec)
+
+2.如果你希望查找员工名字中最常见的10个名字，可以使用GROUP BY first_name对所有名字分组，然后使用COUNT（first_name)在各组内计数，最后使用ORDER BY计数对结果进行排序，并将返回结果行数限制为前10行;
+mysql> SELECT first_name, COUNT(first_name) AS count FROM employees GROUP BY first_name ORDER BY count DESC LIMIT 10;
++-------------+-------+
+| first_name  | count |
++-------------+-------+
+| Shahab      |   295 |
+| Tetsushi    |   291 |
+| Elgin       |   279 |
+| Anyuan      |   278 |
+| Huican      |   276 |
+| Make        |   275 |
+| Sreekrishna |   272 |
+| Panayotis   |   272 |
+| Hatem       |   271 |
+| Vitali      |   270 |
++-------------+-------+
+10 rows in set (0.20 sec)
+
+SUM 
+查找每年给予员工的薪水总额，并按薪水高低对结果进行排序。YEAR()函数将返回给定日期所在的年份：
+mysql> SELECT YEAR(from_date), SUM(salary) AS sum FROM salaries GROUP BY YEAR(from_date) ORDER BY sum DESC;
++-----------------+-------------+
+| YEAR(from_date) | sum         |
++-----------------+-------------+
+|            2000 | 17535667603 |
+|            2001 | 17507737308 |
+|            1999 | 17360258862 |
+|            1998 | 16220495471 |
+|            1997 | 15056011781 |
+|            1996 | 13888587737 |
+|            1995 | 12638817464 |
+|            1994 | 11429450113 |
+|            2002 | 10243347616 |
+|            1993 | 10215059054 |
+|            1992 |  9027872610 |
+|            1991 |  7798804412 |
+|            1990 |  6626146391 |
+|            1989 |  5454260439 |
+|            1988 |  4295598688 |
+|            1987 |  3156881054 |
+|            1986 |  2052895941 |
+|            1985 |   972864875 |
++-----------------+-------------+
+18 rows in set (1.38 sec)
+
+AVERAGE
+查找平均工资最高的10名员工：
+mysql> SELECT emp_no, AVG(salary) AS avg FROM salaries GROUP BY emp_no ORDER BY avg DESC LIMIT 10;
++--------+-------------+
+| emp_no | avg         |
++--------+-------------+
+| 109334 | 141835.3333 |
+| 205000 | 141064.6364 |
+|  43624 | 138492.9444 |
+| 493158 | 138312.8750 |
+|  37558 | 138215.8571 |
+| 276633 | 136711.7333 |
+| 238117 | 136026.2000 |
+|  46439 | 135747.7333 |
+| 254466 | 135541.0625 |
+| 253939 | 135042.2500 |
++--------+-------------+
+10 rows in set (0.75 sec)
+
+DISTINCT
+可以使用DISTINCT子句过滤出表中的不同条目：
+mysql> SELECT DISTINCT title FROM titles;
++--------------------+
+| title              |
++--------------------+
+| Senior Engineer    |
+| Staff              |
+| Engineer           |
+| Senior Staff       |
+| Assistant Engineer |
+| Technique Leader   |
+| Manager            |
++--------------------+
+7 rows in set (4.30 sec)
+
+使用HAVING过滤
+可以通过添加HAVING子句来过滤GROUP BY子句的结果。
+例如，找到平均工资超过140, 000美元的员工;
+mysql> SELECT emp_no, AVG(salary) AS avg FROM salaries GROUP BY emp_no HAVING avg > 140000 ORDER BY avg DESC;
++--------+-------------+
+| emp_no | avg         |
++--------+-------------+
+| 109334 | 141835.3333 |
+| 205000 | 141064.6364 |
++--------+-------------+
+2 rows in set (0.69 sec)
+

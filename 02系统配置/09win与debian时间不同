@@ -1,0 +1,33 @@
+#timedatectl set-local-rtc 1 --adjust-system-clock
+#timedatectl set-local-rtc 0 //取消设置
+原因
+
+Windows双系统时间不统一在于时间表示有两个标准：localtime 和 UTC(Coordinated Universal Time) 。UTC 是与时区无关的全球时间标准。尽管概念上有差别，UTC 和 GMT (格林威治时间) 是一样的。localtime 标准则依赖于当前时区。
+
+时间标准由操作系统设定，Windows 默认使用 localtime，Mac OS 默认使用 UTC 而 UNIX 系列的操作系统两者都有。使用 Linux 时，最好将硬件时钟设置为 UTC 标准，并在所有操作系统中使用。这样 Linux 系统就可以自动调整夏令时设置，而如果使用 localtime 标准那么系统时间不会根据夏令时自动调整。
+方法
+
+通过如下命令可以检查当前设置，systemd 默认硬件时钟为协调世界时（UTC）
+
+$ timedatectl status | grep local
+
+硬件时间可以用 hwclock 命令设置，将硬件时间设置为 localtime（解决双系统时间问题）：
+
+# timedatectl set-local-rtc true
+
+硬件时间设置成 UTC（恢复默认设置）：
+
+# timedatectl set-local-rtc false
+
+上述命令会自动生成/etc/adjtime，无需单独设置。
+
+    Note: 如果不存在 /etc/adjtime，systemd 会假定硬件时间按 UTC 设置。
+linux下安装ntpdate
+ubuntu/Debian： sudo apt-get install ntpdate
+centOS : sudo yum install -y ntp
+archlinux ： sudo pacman -S ntp
+
+其他linux发行版请自行百度，百度键入 {发行版名称}+安装+ntp ， 如 centOS 安装 ntp
+用ntp 更新linux系统时间：
+sudo ntpdate time.windows.com
+重启进入windows检查系统时间是不是改回来了

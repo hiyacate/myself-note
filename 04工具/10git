@@ -1,0 +1,121 @@
+#创建git仓库
+$ git init .
+
+#加入.gitignore文件中，以使git忽略
+$ echo "db.sqlite3" >> .gitignore
+$ echo "geckodriver.log" >> .gitignore
+
+#添加到git仓库
+$ git add "需要添加的文件或目录"
+比如：
+#添加当前目录和子目录下的所有文件，加入 .gitignore 中的文件忽略
+$ git add .
+$ git add "指定文件"
+
+#查看改变内容
+$ git status
+
+#查看上一次提交和当前硬盘中保存内容之间的差异
+$ git diff
+
+#从git中删除没必要提交的文件或目录 
+$ git rm -r --cached "需要删除的内容"
+
+#做提交
+$ git commit
+
+#第一次提交
+$ git push --set-upstream user@host:name master
+
+git查看commit提交记录详情
+原创 L凯 最后发布于2018-05-09 11:16:37 阅读数 80754 收藏
+展开
+如何使用git查看commit修改了哪些内容，以便后续的代码工作。与之相关的命令就是:
+git log 查看所有的commit提交记录
+git show 查看提交的详情
+具体步骤：
+    首先，需要通过git log打印所有commit记录,例如
+
+之后的git show都是基于commit hashID输出的。
+1.查看最新的commit
+git show
+2.查看指定commit hashID的所有修改：
+git show commitId
+3.查看某次commit中具体某个文件的修改：
+git show commitId fileName
+
+修改git commit编辑方式：
+1) 方法一 修改系统的配置
+
+git config --global core.editor vim
+
+------
+2) 方法二 针对 git 项目修改
+
+打开文件 .git/config
+在 core 中添加
+editor=vim
+
+git push远程
+…or create a new repository on the command line
+
+echo "# test" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin git@github.com:Baoza-J/test.git
+git push -u origin master
+
+
+…or push an existing repository from the command line
+
+git remote add origin git@github.com:Baoza-J/test.git
+git push -u origin master
+
+…or import code from another repository
+
+You can initialize this repository with code from a Subversion, Mercurial, or TFS project.
+
+git修改commit注释 已提交但并未push
+原创 店小不二 最后发布于2018-08-24 23:32:06 阅读数 12051 收藏
+展开
+只需要修改最新的一次commit注释
+
+这种情况比较简单，git为commit命令提供了--amend 参数
+
+例子：
+
+    git log 见下图，此次提交注释为 create new file 2
+    这里写图片描述
+
+    之后执行git commit --amend, 之后便可以利用vim来进行编辑，编辑之后注释为create new file 2 after change。(vim可按i键进入编辑模式，esc退出编辑模式，ZZ保存并退出。更多操作可查阅vim相关资料)
+    这里写图片描述
+
+    最后可再次执行git log查看修改结果。
+
+修改历史提交注释（修改历史多次提交注释）
+
+这时必须用到 git rebase 命令
+
+    git rebase -i HEAD~X 比如我想修改最近两条commit的注释，即输入git rebase -i HEAD~2
+
+打开后pick开头的几行注释，如下图所示
+pick XXXXXXXXX
+pick XXXXXXXXX
+
+上边红框是两次的注释，下边红框是常用commands。
+这里写图片描述
+
+    将pick修改为edit
+    这里写图片描述
+
+    修改完成之后git log 可以看到git的最后一次提交已经变成你修改为edit的那个注释了，这时再使用git commit --amend。 可参考上文（只需要修改最新的一次commit注释）一节。
+
+    修改完成后 git rebase --continue
+
+
+    通过git stash将工作区恢复到上次提交的内容，同时备份本地所做的修改，之后就可以正常git pull了，git pull完成后，执行git stash pop将之前本地做的修改应用到当前工作区。
+git stash
+git pull
+git stash pop
+

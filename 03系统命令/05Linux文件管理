@@ -1,0 +1,407 @@
+文件和目录管理
+几乎所有的计算机操作系统都使用目录结构组织文件。目录系统组织文件具体来说就是在一个目录中存放子目录和文件，而在子目录中又会进一步存放子目录和文件，以此类推形成一个树形文件结构，由于其结构很像一颗树的分支，所以该结构又被称为“目录树”。在Linux系统中也没用了这种文件结构，所有目录和文件都在“根目录”下，目录名为“/”。FHS（文件系统层次标准）定义了在根目录下的主要目录以及每个目录应该存放什么文件。下面进入中，查看一下Linux安装后默认的目录，如下所示：
+pretty@debian-v:/$ ls
+bin   etc         initrd.img.old  lib64       media  proc  sbin  tmp  vmlinuz
+boot  home        lib             libx32      mnt    root  srv   usr  vmlinuz.old
+dev   initrd.img  lib32           lost+found  opt    run   sys   var
+
+根据FHS的定义，每个目录应该旋转的文件如下所示：
+/bin            常见的用户指令
+/bot            内核和启动文件
+/dev            设备文件
+/etc            系统和服务的配置文件
+/home           系统默认的普通用户的家目录
+/lib            系统函数库目录
+/lost+found     et3文件系统需要的目录，用于磁盘检查
+/mnt            系统加载文件系统时常用的挂载点
+/opt            第三方软件安装目录
+/proc           虚拟文件系统
+/root           root用户的家目录
+/sbin           存放系统管理命令
+/tmp            临时文件的存放目录
+/usr            存放与用户直接相关的文件和目录
+/media          系统用来挂载光驱等临时文件系统的点
+
+绝对路径和相对路径
+绝对路径
+正如前文所述，Linux系统采用了目录树的文件组织结构，在Linux下每个目录或文件都可以从根目录处开始寻找，比如：/usr/local/src目录。这种从根目录开始的全路径被称为“绝对路径”，绝对路径一定是以“/”开关的。
+
+当前目录:pwd
+想要确定当前所在的目录，可以使用以下pwd命令查看：
+pretty@debian-v:~$ pwd
+/home/pretty
+
+特殊目录：（.）和（..）
+在每个目录下，都会固定存在两个特殊目录，分别是一个点（.）和两个点（..）的目录。一个点代表的是当前目录，两个点代表的是当前目录的上层目录。在Linux下，所有以点开始的文件都是"“隐藏文件”，对于这类文件，只使用命令ls -l是看不到的，必须要使用ls -la才可以看到。
+
+相对路径
+“相对路径”的关键在于当前在什么路径下。假设当前目录在/usr/local下，那么它的上层目录（/usr目录）可以用../表示，而/usr/local的下层目录（src）则可以用./src表示。前面讲到的（.）和（..）目录实际上也是属于相对路径。
+
+文件的相关操作
+Linux遵循一切皆文件的规则，对Linux进行配置时，在很大程度上就是处理文件的过程，所以掌握文件的相关操作是非常有必要的。接下来将介绍如何创建、删除、移动、重命名、查看文件，以及不同系统之间进行格式转换。
+
+创建文件：touch
+在Linux中创建文件，只需要进入相关目录，然后使用touch命令即可，参数为想要创建文件的文件名。比如说，在/tmp目录中创建一个test.txt文件：
+pretty@debian-v:/tmp$ touch test.txt
+pretty@debian-v:/tmp$ ls
+fcitx-socket-:0
+pulse-PKdhtXMmr18n
+ssh-xfCkiasxEFZ9
+systemd-private-dcff87f647b2427699cdcfcc74b04f7c-apache2.service-rqyrDq
+systemd-private-dcff87f647b2427699cdcfcc74b04f7c-ModemManager.service-Hv5pfP
+systemd-private-dcff87f647b2427699cdcfcc74b04f7c-rtkit-daemon.service-XJLBWL
+systemd-private-dcff87f647b2427699cdcfcc74b04f7c-upower.service-X4j0BM
+test.txt
+
+事实上，如果在使用touch命令创建文件的时候，当前目录中已经存在了这个文件，那么这个命令不会对当前的同名文件造成影响，因为它并不会修改文件的内容，虽然实际上touch确实对该文件做了“修改”——它会更新文件的创建时间属性。比如说，在当前目录下我们继续使用touch test.txt命令，然后观察该文件时间属性部分的变化：
+pretty@debian-v:/tmp$ ls -l test.txt
+-rw-r--r-- 1 pretty pretty 0 Jan 13 21:38 test.txt
+pretty@debian-v:/tmp$ touch test.txt
+pretty@debian-v:/tmp$ ls -l test.txt
+-rw-r--r-- 1 pretty pretty 0 Jan 13 21:43 test.txt
+
+删除文件:rm
+该命令是remove的缩写，意思是“移除”。后面的参数是想要删除的文件的文件名，按回车键后系统会询问是否确认删除，这时候输入“y“然后按回车即可。这里“y”的含义是yes,如果你现在反悔了，输入“n”后按回车键，将不会删除这个文件。
+（目前已知debian和ubuntu系统中没有输入y/n的步骤）
+
+3.移动或重命名文件：mv
+mv 后面需要跟两个参数，第一个参数是要被移动的文件，第二个参数是移动到的目录。
+除了能移动文件，该命令还能重命名文件。
+还可以在移动文件的同时重命名文件。
+
+需要注意的是，Linux下的目录也是一种“文件”，所以mv命令也同样适用于对目录的操作。
+
+查看文件：cat
+该命令是concatenate的简写，用户查看文件内容，后面跟上要查看的文件名即可。
+
+查看文件头：head
+有时候文件非常大，使用cat命令显示出来的内容太多，而我们可能并不想查看所有内容，只是想看看文件开始部分的内容，这时候就可以使用head命令了，后面跟上需要查看的文件名就可以了。默认情况下，head将显示该文件前10行的内容。
+
+也可以使用-n参数指定显示的行数
+
+查看文件尾：tail
+tail命令与head类似，可以查看文件的最后10行，同样可以使用-n参数指定显示的行数。
+但是tail还有个更实用的功能，就是可以动态地查看文件尾。这对查看一些不断改变的文件来说非常有用。比如说，系统中会有很多日志文件，这些文件是会随时变化的（具体地说，就是随时会有新的日志写入），要动态地查看这些文件，使用-f参数就可以做到。比如，/var/log/message文件是默认的系统日志文件，系统在运行中将会有大量的日志写入这个文件中，可以使用如下的命令，一旦有新的日志内容写入，该命令会立即将新内容显示出来。
+root@debian-v:~# tail -f /var/log/messages
+
+文件格式转换：dos2unix
+该命令是DOS to UNIX的简写，也许你从字面上可以大概猜到它的作用，就是可以把DOS格式的文本文件转变成UNIX下的文本文件。之所以有这样的需求是因为Linux和Windows系统是可以通过文件共享的方式共享文件的，当把Window下的文本文件移动到Linux下时，会由于系统之间文本文件的换行符不同而造成文件在Linux下的读写操作有问题。该命令的使用方式非常简单直接，后面跟上需要转换的文件名即可。
+
+目录的相关操作
+与其他操作系统一样，Linux也有目录的概念，目录的作用在于存放其他的目录和文件。
+进入目录：cd
+该命令是change directory的简写，方便用户切换到不同的目录，pwd可以显示当前所处的目录。
+
+创建目录：mkdir
+该命令是make directory的简写，其用途是创建目录，使用方法是在后面跟上目录的名称。
+如果要在创建一个目录dir1后，需要继续在dir1中创建dir2,接着在dir2中创建dir3,可以使用-p参数一次性创建所有目录，如下所示：
+pretty@debian-v:~$ ls
+Desktop    Downloads  Music      Pictures  Public     tmp
+Documents  Envs       myproject  Projects  Templates  Videos
+pretty@debian-v:~$ mkdir -p dir1/dir2/dir3
+pretty@debian-v:~$ tree dir1
+dir1
+└── dir2
+    └── dir3
+
+删除目录：rmdir 和 rm
+该命令是remove directory的简写，用来删除目录。但是需要注意的是，它只能删除家目录，如果目录不为空（存在文件或者子目录），那么该命令将拒绝删除指定的目录。如果有成千上万的目录和文件，这样效率太低，这时可以使用rm命令来删除文件，加入参数-r就可以实现，按y确定，使用-rf参数，则不用输入y进行确定。
+root用户在使用rm -rf/命令来删除全部的系统文件，结果是灾难性的，因此一定要慎之又慎！
+
+文件和目录复制：cp
+该命令是copy的简写，用于复制文件和目录。如果是复制文件，其后接两个参数，第一个参数是要复制的源文件，第二个参数是要复制到的目录或复制后的文件名
+
+复制目录需要使用cp -r 命令。
+
+文件的时间戳
+之前在介绍touch命令的时候，已经知道通过touch可以创建文件。如果文件已经存在，那么touch命令仅仅会更新文件的创建时间而不会修改文件内容。请记住，在Linux下目录也是一种文件，所以如果touch一个目录，这个目录的创建时间也会被更新。在下面的例子中，创建了一个文件touch_file和一个目录touch_dir1，注意看一下时间是多少，两分钟后，同时touch它们，再看一下时间就都变为了两分钟后。
+pretty@debian-v:~/tmp$ touch touch_file
+pretty@debian-v:~/tmp$ mkdir touch_dir1
+pretty@debian-v:~/tmp$ ll
+total 4
+drwxr-xr-x 2 pretty pretty 4096 Feb  4 14:20 touch_dir1
+-rw-r--r-- 1 pretty pretty    0 Feb  4 14:20 touch_file
+pretty@debian-v:~/tmp$ touch *
+pretty@debian-v:~/tmp$ ll
+total 4
+drwxr-xr-x 2 pretty pretty 4096 Feb  4 14:21 touch_dir1
+-rw-r--r-- 1 pretty pretty    0 Feb  4 14:21 touch_file
+
+不管是哪种系统，几乎所有的程序都会读写系统文件，默认情况下，一旦发生写文件操作，该文件的时间戳将会立刻得到更新。因此可以利用这种特性来有选择性地备份一些文件（双叫差异备份）。比如有一个目录中有若干个文件，我们每天需要备份一次。最简单的办法是每天使用cp操作全部备份一次，但是这种做法在文件总大小比较大的情况下会显得效率不高。如果有一些文件很大，但是和上一次备份相比并没有发生任何变化，实际上是不需要进行备份的，只需要找出在上一次备份之后发生变化的文件，然后备份这些文件即可。为了演示利用时间戳来进行差异化备份，下面先创建一些目录和文件：
+
+[root@ localhost ~]# mkdir org_ dir #这是 要 备份 的 目录 
+[root@ localhost ~]# mkdir bak_ dir #这是 备份 存放 目录 
+[root@ localhost ~]# cd org_ dir/ #进入 要 备份 的 目录 
+[root@ localhost org_ dir]# touch a b c #创建 几个 文件
+
+第一次备份自然是需要复制org_dir下的所有文件到bak_dir中：
+[root@ localhost org_ dir]# cp * ../bak_ dir/ 
+#复制 当前 目 录下 的 所有 文件 到 上层 目录 的 bak_ dir 目录 中 
+#这里 用到 了 一个 星号“*”， 代表 所有， 还用 到了 相对 目录
+
+复制完成后，在这个目录中利用touch命令创建一个新文件time_stamp，注意看一下，该文件和其他文件的时间戳不一样，time_stamp文件的创建时间戳自然是比其他的文件要晩。下次备份的时候，只需要找出比time_stamp文件时间戳新的文件，然后备份该文件即可，如下所示：
+[root@ localhost org_ dir]# touch time_ stamp 
+[root@ localhost org_ dir]# ll 
+total 0 -rw- r-- r-- 1 root root 0 Jan 3 19: 35 a 
+-rw- r-- r-- 1 root root 0 Jan 3 19: 35 b 
+-rw- r-- r-- 1 root root 0 Jan 3 19: 35 c 
+-rw- r-- r-- 1 root root 0 Jan 3 19: 43 time_ stamp
+
+假设再一次备份的时候，文件a是被更新过了的，这里使用touch来模拟一下这个场景：使用touch命令发现a文件的时间戳比time_stamp要新，那么可知a被等程序修改过了，而其他的文件（文件b和文件c）并没有被更新，这时只需要备份a文件就可以了。备份完成后，还需要继续touch一下time_stamp,以更新该文件的时间戳，在下次备份的时候只需要找比这个文件时间时间戳更新的文件即可，如下所示：
+
+[root@ localhost org_ dir]# touch a 
+[root@ localhost org_ dir]# ll 
+total 0 
+-rw- r-- r-- 1 root root 0 Jan 3 19: 47 a 
+-rw- r-- r-- 1 root root 0 Jan 3 19: 35 b 
+-rw- r-- r-- 1 root root 0 Jan 3 19: 35 c 
+-rw- r-- r-- 1 root root 0 Jan 3 19: 43 time_ stamp 
+[root@ localhost org_ dir]# cp a ../bak_ dir/ 
+cp: overwrite '../bak_ dir/ a'? y 
+[root@ localhost org_ dir]# touch time_ stamp
+
+这里只是举一个例子来说明利用文件时间戳来做备份的原理，在实际工作中必须将这种过程脚本化、自动化。因为人为地备份文件一方面容易出错，另一方面也是不现实的：想象一下如果需要备份的文件有成百上千个，人工地比较文件的时间戳是不可能的。
+
+文件和目录的权限
+Linux系统之所以更安全，是因为对文件权限有着非常严格的控制，接下来介绍Linux系统中文件权限的概念，这些概念非常重要，了解和熟练掌握Linux下目录和文件的权限是必须的。
+
+查看文件或目录的权限：ls -al
+pretty@debian-v:~$ ls -l
+total 48
+drwxr-xr-x 2 pretty pretty 4096 Jan  6 20:14 Desktop
+drwxr-xr-x 3 pretty pretty 4096 Feb  4 11:32 Documents
+drwxr-xr-x 2 pretty pretty 4096 Feb  4 09:44 Downloads
+drwxr-xr-x 3 pretty pretty 4096 Jan  8 21:17 Envs
+drwxr-xr-x 2 pretty pretty 4096 Jan  6 20:14 Music
+drwxr-xr-x 3 pretty pretty 4096 Jan  8 22:30 myproject
+drwxr-xr-x 3 pretty pretty 4096 Jan  8 20:15 Pictures
+drwxr-xr-x 4 pretty pretty 4096 Jan  8 21:41 Projects
+drwxr-xr-x 2 pretty pretty 4096 Jan  6 20:14 Public
+drwxr-xr-x 2 pretty pretty 4096 Jan  6 20:14 Templates
+drwxr-xr-x 5 pretty pretty 4096 Feb  4 16:31 tmp
+drwxr-xr-x 2 pretty pretty 4096 Jan  6 20:14 Videos
+
+每个文件都有7列输出
+第一列是文件类别和权限，这列由10个字符组成，第一个字符表明该文件的类型。接下来的属性中，每3个字符为一组，第2～4个字符代表该文件所有者(user)的权限，第5～7个字符代表给文件所有组(group)的权限，第8～10个字符代表其他用户(others)拥有的权限。每组都是rwx的组合，如果拥有读权限，则该组的第一个字符显示r，否则显示一个小横线；如果拥有写权限，则第三个字符显示w，否则显示一个小横线；如果拥有执行权限，则第三个字符显示x，否则显示一个小横线。
+
+第一个字符可能的值                       含义
+         d                               目录
+         -                               普通文件
+         l                               链接文件
+         b                               块文件
+         c                               字符文件
+         s                               socket 文件
+         p                               管道文件
+
+第二列代表“连接数”，除了目录文件外，其他所有文件的连接数都是1,目录文件的连接数是该目录中包含其他目录的总个数+2,也就是说，如果目录A中包含目录B和C，则目录A的连接数为4。
+
+第三列代表该文件的所有人，第四列代表该文件的所有组，第五列是该文件的大小，第六列是该文件的创建时间或最近的修改时间，第七列是文件名
+
+文件隐藏属性
+Linux下有一些隐藏属性，必须使用lsattr来显示，默认情况下，文件的隐藏属性都是没有设置的。查看文件的隐藏属性需要使用lsattr命令，如下所示：
+pretty@debian-v:~$ lsattr
+--------------e---- ./Documents
+--------------e---- ./Projects
+--------------e---- ./Downloads
+--------------e---- ./tmp
+--------------e---- ./Public
+结果中的第一列是13个小短横，其中每一个小横线都是一个属性，如果当前位置上设置了该属性就会显示相应的字符。
+如果要设置文件的隐藏属性，需要使用chattr命令。这里介绍几个常用的隐藏属性，第一种是a属性。拥有这种属性的文件只能在尾部增加数据而不能被删除。
+下面使用chattr来给该文件添加a属性：
+root@debian-v:/home/pretty/tmp# touch chattr+a
+root@debian-v:/home/pretty/tmp# lsattr chattr+a 
+--------------e---- chattr+a
+root@debian-v:/home/pretty/tmp# chattr +a chattr+a 
+root@debian-v:/home/pretty/tmp# rm chattr+a 
+rm: cannot remove 'chattr+a': Operation not permitted
+root@debian-v:/home/pretty/tmp# chattr -a chattr+a 
+root@debian-v:/home/pretty/tmp# rm chattr+a 
+root@debian-v:/home/pretty/tmp# ls
+bak_dir  org_dir  touch_dir1  touch_file
+
+如上所示，设置了a属性的文件，即便是root用户也不能删除它，但是实际上可以以尾部新增(append)的方式继续向该文件中写入内容。
+
+还有一种比较常用的属性是i属性。设置了这种属性的文件将无法写入、改名、删除，即便是root用户也不行。这种属性常用于设置在系统或者关键服务中的配置文件，这对提升系统安全性有较大的帮助。
+更多隐藏属性请使用man chattr查看。
+
+改变文件权限：chmod
+从前面内容可知，Linux下的每个文件都定义了文件拥有者(user)、拥有组(group)、其他人(others)的权限，我们使用字母u、g、o来分别代表拥有者、拥有组、其他人，而对应的具体权限则使用rwx的组合来定义，增加权限使用+号，删除权限使用-号，详细权限使用=号。
+
+        作用                             命令
+给某文件添加用户读权限           chmod u+r somefile
+给某文件删除用户读权限           chmod u-r somefile
+给某文件添加用户写权限           chmod u+w somefile
+给某文件删除用户写权限           chmod u-w somefile
+给某文件添加用户执行权限         chmod u+x somefile
+给某文件删除用户执行权限         chmod u+x somefile
+添加用户对某文件的读写执行权限   chmod u+rwx somefile
+删除用户对某文件的读写执行权限   chmod u-rwx somefile
+给某文件设定用户拥有读写执行权限 chmod u=rwx somefile
+
+如果要给用户组或其他人添加或删除相关权限，只需要将上面的u相应地更换为g或o即可。但是正如大家看到的，这种方式同一时刻只能给文件拥有者、文件拥有组或其他所有人设置权限，如果要想同时设置所有人的权限就需要使用数字表示法了，我们定义r=4,w=2,x=1,如果权限是rwx,则数字表示为7，如果权限是r-x，则数字表示为5。假设想设置一个文件的权限是：拥有者的权限是读、写、执行(rwx),拥有组的权限是读、执行(r-x),其他人的权限是只读(r--),那么可以使用命令chmod 754 somefile来设置。
+如果需要修改的不是一个文件而是一个目录，以及该目录下所有的文件、子目录、子目录下所有的文件和目录（即递归设置该目录下所有的文件和目录的权限），则需要使用-R参数，也就是chmod -R 754 somedir。
+使用数字表示法设置权限是很常用的方式，读者一定要熟练掌握。
+
+改变文件的拥有者:chown
+该命令用来更改文件的拥有者，同时它也具备更改文件拥有组的功能。默认情况下，使用什么用户登录系统，那么该用户新创建的文件和目录的拥有者就是这个用户，比如使用root账户登录后，创建了一个文件a.txt，那么该文件的拥有者是root用户，如下所示：
+
+root@debian-v:/home/pretty/tmp# touch a.txt
+root@debian-v:/home/pretty/tmp# ls -lh a.txt
+-rw-r--r-- 1 root root 0 Feb  5 19:18 a.txt
+
+要是想改变该文件的拥有者该怎么办呢？可使用chown命令将该文件的拥有者更改为john（假设系统中有这个用户）：
+
+root@debian-v:/home/pretty/tmp# ls -l a.txt
+-rw-r--r-- 1 root root 0 Feb  5 19:18 a.txt
+root@debian-v:/home/pretty/tmp# chown pretty a.txt
+root@debian-v:/home/pretty/tmp# ls -l a.txt
+-rw-r--r-- 1 pretty root 0 Feb  5 19:18 a.txt
+
+该命令还可以同时更改文件的用户组。继续将该文件改为john用户组，使用方式如下：
+
+root@debian-v:/home/pretty/tmp# ls -l a.txt
+-rw-r--r-- 1 pretty root 0 Feb  5 19:18 a.txt
+root@debian-v:/home/pretty/tmp# chown :pretty a.txt
+root@debian-v:/home/pretty/tmp# ls -l a.txt
+-rw-r--r-- 1 pretty pretty 0 Feb  5 19:18 a.txt
+
+以上两步可以使用一条命令同时设置：
+chown user:group somefile
+
+root@debian-v:/home/pretty/tmp# ls -l a.txt
+-rw-r--r-- 1 pretty pretty 0 Feb  5 19:18 a.txt
+root@debian-v:/home/pretty/tmp# chown root:root a.txt
+root@debian-v:/home/pretty/tmp# ls -l a.txt
+-rw-r--r-- 1 root root 0 Feb  5 19:18 a.txt
+
+如果要修改的还是一个文件而是一个目录，以及该目录下所有的文件、子目录、子目录下的所有的文件和目录（即递归设置该目录下所有的文件和目录的拥有者是john),则需要使用-R参数，也就是chown -R user somedir; 如果要同时修改用户组为john,则使用chown -R user:group somedir。
+
+改变文件的拥有组：chgrp
+该命令用来更改文件的拥有组。下面将新创建的文件b.txt修改用户组为pretth
+
+root@debian-v:/home/pretty/tmp# touch b.txt
+root@debian-v:/home/pretty/tmp# ls -l b.txt
+-rw-r--r-- 1 root root 0 Feb  5 19:30 b.txt
+root@debian-v:/home/pretty/tmp# chgrp pretty b.txt
+root@debian-v:/home/pretty/tmp# ls -l b.txt
+-rw-r--r-- 1 root pretty 0 Feb  5 19:30 b.txt
+
+如果需要修改的还是一个文件而是一个目录，以及该目录下所有的文件、子目录、子目录下所有的文件和目录（即递归设置该目录下所有的文件和目录的拥有组是john），则需要使用-R参数，也就是chgrp -R john somedir
+
+文件特殊属性：SUID/SGID/Sticky
+在介绍SUID之前，让我们来看一个奇怪的问题：每个用户都可以使用passwd（该命令的绝对路径是/usr/bin/passwd）来修改自己的密码。系统用记录用户信息和密码的文件分别是/etc/passwd和/etc/shadow，命令passwd执行的最终结果是去修改/etc/shadow中对应用户的密码。对于这个文件,只有root用户有读权限，而普通用户在修改自己的密码时，最终也会修改这个文件。注意，虽然/etc/shadow文件对于root用户来说只有读权限，但是实际上root是可以使用强写的方式来更新这个文件的。但是普通用户在运行这个命令时居然有权限来写/etc/shadow文件，怎么可能呢？先来确认一下/etc/passwd和/etc/shadow的文件属性，从而确定普通用户根本没有写权限：
+[root@ localhost ~]# ls -l /etc/ passwd 
+-rw- r-- r-- 1 root root 1379 Dec 10 04: 41 /etc/passwd 
+[root@ localhost ~]# ls -l /etc/ shadow 
+-r-------- 1 root root 859 Dec 10 04: 41 /etc/shadow
+
+再来看一下/usr/bin/passwd的权限，发现有个特别的s权限在用户上，这就是奥秘所在————该命令是设置了SUID权限的，这意味着普通用户可以使用root的身份来执行这个命令。那么以上的疑问就很容易解释了。但是必须注意的是，SUID权限只能用于二进制文件。确认一下/usr/bin/passwd的权限:
+pretty@debian:~$ ll /usr/bin/passwd
+-rwsr-xr-x 1 root root 63K Jul 27  2018 /usr/bin/passwd
+
+下面是给一个二进制文件添加SUID权限的方法：
+pretty@debian:~/tmp$ ll somefile
+-rw-r--r-- 1 pretty pretty 0 Mar 10 09:18 somefile
+pretty@debian:~/tmp$ chmod u+s somefile
+pretty@debian:~/tmp$ ll somefile
+-rwSr--r-- 1 pretty pretty 0 Mar 10 09:18 somefile
+
+介绍完SUID之后，想必再来理解SGID就很容易了：如果某个二进制文件的用户组权限被设置了s权限，则该文件的用户组中所有的用户将才能以该文件的用户身份去运行这个命令，一般来说SGID命令在系统中用得很少，给一个二进制文件添加SGID权限的方法如下：
+pretty@debian:~/tmp$ chmod g+s somefile
+pretty@debian:~/tmp$ ll somefile
+-rwSr-Sr-- 1 pretty pretty 0 Mar 10 09:22 somefile
+
+Sticky权限只能用于设置在目录上，设置了这种权限的目录，任何用户都可以在该目录中创建或修改文件，但是只有该文件的创建者和root可以删除自己的文件。
+RedHat或CenOS系统中的/tmp目录就拥有Sticky权限（注意看权限部分的最后是t),如下所示：
+pretty@debian:~/tmp$ ll -d /tmp
+drwxrwxrwt 13 root root 4.0K Mar 10 09:09 /tmp
+
+举个例子，用户john在登录后，在/tmp下创建了一个文件john_file，然后，用户jack也登录到系统中进入/tmp目录，他试图删除这个文件，系统会告诉他没有权限删除这个文件，如下所示:
+
+#用户 john 登录 到 系统 中 并 创建 了/ tmp/ john_ file 
+[john@ localhost ~]$ cd /tmp/ 
+[john@ localhost tmp]$ touch john_ file
+
+#用户 jack 登录 到 系统 中 试图 删除/ tmp/ john_ file 
+[jack@ localhost ~]$ cd /tmp/ 
+[jack@ localhost tmp]$ rm john_ file 
+rm: remove write- protected regular empty file 'john_ file'? y 
+rm: cannot remove 'john_ file': Operation not permitted
+
+给一个目录添加t权限的方式如下：
+pretty@debian:~$ mkdir somedir
+pretty@debian:~$ ll somedir/
+total 0
+pretty@debian:~$ ll
+total 2
+drwxr-xr-x 2 pretty pretty 4.0K Mar 10 09:43 somedir
+pretty@debian:~$ chmod o+t somedir/
+pretty@debian:~$ ll
+total 2
+drwxr-xr-t 2 pretty pretty 4.0K Mar 10 09:43 somedir
+
+默认权限和umask
+既然说Linux系统对每个文件都有严格的权限控制，但是似乎到目前为止书中还并没有太细致地设置文件权限，而且在新创建文件的时候，也没有特意设置过权限。事实上，所有的文件在创建时就都是有权限的了，那么这些权限是怎么来的呢？也许你会想到是系统采用了默认权限的方法，也就是当我们创建文件的时候，系统套用默认权限来设置了文件。下面使用root用户登录系统来看一下：
+pretty@debian:~/tmp$ su
+Password:
+root@debian:/home/pretty/tmp# touch root_file1
+root@debian:/home/pretty/tmp# touch root_file2
+root@debian:/home/pretty/tmp# ls -l root_file1
+-rw-r--r-- 1 root root 0 Mar 11 10:53 root_file1
+root@debian:/home/pretty/tmp# ls -l root_file2
+-rw-r--r-- 1 root root 0 Mar 11 10:53 root_file2
+root@debian:/home/pretty/tmp# mkdir root_dir1
+root@debian:/home/pretty/tmp# mkdir root_dir2
+root@debian:/home/pretty/tmp# ls -ld root_dir1
+drwxr-xr-x 2 root root 4096 Mar 11 10:54 root_dir1
+root@debian:/home/pretty/tmp# ls -ld root_dir2
+drwxr-xr-x 2 root root 4096 Mar 11 10:54 root_dir2
+root@debian:/home/pretty/tmp# 
+
+注意，创建的root_file1、root_file2文件的权限都是644;创建的root_dir1、root_dir2目录的权限都是755。到这里似乎可以得出一个结论：文件的权限默认是644,目录的默认权限是755。但是实际情况是这样的吗？让我们使用普通用户来操作一下，如下所示：
+pretty@debian:~/tmp$ touch pretty_file1
+pretty@debian:~/tmp$ touch pretty_file2
+pretty@debian:~/tmp$ ls -l pretty_file1
+-rw-r--r-- 1 pretty pretty 0 Mar 11 11:04 pretty_file1
+pretty@debian:~/tmp$ ls -l pretty_file2
+-rw-r--r-- 1 pretty pretty 0 Mar 11 11:04 pretty_file2
+pretty@debian:~/tmp$ mkdir pretty_dir1
+pretty@debian:~/tmp$ mkdir pretty_dir2
+pretty@debian:~/tmp$ ls -ld pretty_dir1
+drwxr-xr-x 2 pretty pretty 4096 Mar 11 11:05 pretty_dir1
+pretty@debian:~/tmp$ ls -ld pretty_dir2
+drwxr-xr-x 2 pretty pretty 4096 Mar 11 11:05 pretty_dir2
+
+这里创建的pretty_file1、pretty_file2文件的权限都是644；创建的pretty_dir1、pretty_dir2目录的权限都是755。
+
+
+这个默认权限是从哪里来的呢？ #debian系统中没有umask内容,以下内容摘自linux系统命令及shell脚本实践指南
+要想回答上面的问题，就需要引入umask概念，中文翻译为：遮罩。在Linux下，定义目录创建的默认权限的值是"umask遮罩777后的权限",定义文件创建的默认权限是“umask遮罩666后的权限”。
+系统在/etc/profile文件中，通过第51行至55行的一段代码设置了不同用户的遮罩值。
+if [ $ UID -gt 99 ] && [ "`id -gn`" = "`id -un`" ]; then umask 002 else
+umask 022 fi
+从上 面的 代码 中 可以 看出， UID 大于 99 的 用户 设置 了 umask 为 002， 否则 为 022。 所以 umask 值 对于 root 用户 是 022， 对于 普通 用户 是 002， 这 也就 造成了 上面 我们 看到 的 root 用户 和 普通 用户 创建 出来 的 文件 和 目录 默认 权限 不一样， 那么 如何 使用 遮 罩 计算 权限 呢？ 777 用 字符串 表示 为： rwxrwxrwx， 如果 遮 罩 值 是 022， 用 字符串 表示 为：---- w-- w-， 那么 前者 第 五位 和 第八 位 的 w 被 遮 罩 掉， 权限 变为 rwxr- xr- x， 用 数字 表示 就是 755。 如果 遮 罩 值 是 002， 用 字符串 表示 为：------- w-， 那么 第八 位 的 w 被 遮 罩 掉， 权限 变为 rwxrwxr- x， 用 数字 表示 就是 775。
+666 用 字符串 表示 为： rw- rw- rw-， 如果 遮 罩 值 是 022， 用 字符串 表示 为：---- w-- w-， 那么 前者 第 五位 和 第八 位 的 w 被 遮 罩 掉， 权限 变为 rw- r-- r--， 用 数字 表示 就是 644。 如果 遮 罩 值 是 002， 用 字符串 表示 为：------- w-， 那么 第八 位 的 w 被 遮 罩 掉， 权限 变为 rw- rw- r--， 用 数字 表示 就是 664。 特别强调 一下， 网络 上有 很多 关于 计算 umask 遮 罩 后 权 限值 的 讲解， 比较 主流 但是 错误 的 讲解 方式 是 使用“ 同位 相减” 的 做法 来 计算 遮 罩 后的 值， 比如说 777- 022 同位 相减 得到 755， 666- 022 同位 相减 得到 644， 这种 看似 正确 的 结果 其实 只是 一种 巧合， 并不是 了解 遮 罩 的 正确 方式。 假设 有个 文件 的 权限 为 666， 在 遮 罩 值 为 011 的 情况下， 采用 该“ 同位 相减” 的 方法 计 算出 的 权 限值 为 655， 但 实际上 正确 的 权限 值 应该 是 666。 这点 请 读者 注意。
+
+查看文件类型：file
+之前已经讲到，使用ls-l命令可以通过查看第一个字符判断文件类型。字母d代表目录、字母l代表连接文件，字母b代表块文件，字母c代表字符文件，字母s代表socket文件，字符-代表普通文件，字母p代表管道文件，而file命令则可以直接告诉我们文件类型，还能给出更多的文件信息，如下所示
+#/root是一个目录
+jerry@debian:~$ file /root
+/root: directory
+#/tmp是一个拥有sticky属性的目录
+jerry@debian:~$ file /tmp
+/tmp: sticky, directory
+#使用ls -l命令查看，显示这是一个普通文件
+jerry@debian:~$ ls -l /etc/passwd
+-rw-r--r-- 1 root root 2136 Feb  9 17:19 /etc/passwd
+#使用file命令查看，显示这是一个ASCII编码的文本文件
+jerry@debian:~$ file /etc/passwd
+/etc/passwd: ASCII text
+#使用ls -l 命令查看，显示这是一个普通文件，看不出与/etc/passwd的差别
+jerry@debian:~$ ls -l /usr/bin/passwd
+-rwsr-xr-x 1 root root 63736 Jul 27  2018 /usr/bin/passwd
+#使用file命令查看，显示这是一个64位的可执行性二进制文件 
+jerry@debian:~$ file /usr/bin/passwd
+/usr/bin/passwd: setuid ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=8a0e83d497675cb24e003f9d993c1770502483e8, stripped
+
+查找文件

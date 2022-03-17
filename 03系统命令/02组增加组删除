@@ -1,0 +1,17 @@
+添加用户组
+groupadd www
+
+添加用户
+useradd -g www -d /data -s /bin/bash -m www
+
+给用户设置密码
+passwd www
+
+删除一个用户
+userdel www
+
+查看一个用户信息
+id www
+
+给用户sudo权限
+visudo

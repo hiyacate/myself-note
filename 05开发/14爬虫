@@ -1,0 +1,499 @@
+Requests:
+自动爬取HTML页面 自动网络请求提交
+
+robots.txt
+网络爬虫排除标准
+
+Beautiful Soup
+解析HTML页面信息瓢记与提取方法
+
+实战项目
+实例1-中国大学排名爬虫
+
+requests 库
+to install requests
+pip install requests
+Requests库的7个主要方法
+requests.request() 构造一请求，支撑以下各方法的基础方法
+requests.get()	获取HTML网页的主要方法，对应于HTTP的GET
+requests.head()	获取HTML网页头信息的方法，对应于HTTP的HEAD
+requests.post()	向HTML网页提交POST请求的方法，对应于HTTP的POST
+requests.put()	向HTML网页提交PUT请求的方法，对应于HTTP的PUT
+requests.patch()向HTML网页提交局部修改请求，对应于HTTP的PATCH
+requests.delete()向HTML页面提交删除请求，对应于HTTP的DELETE
+
+r = request.get(url) 构造一个向服务器请求资源的Request对象,返回一个包含服服器资源的Response对象
+requests.get(url, params=None, **kwargs)
+url:拟获取页面的url链接
+params:url中的额外参数，字典或字节流格式，可选
+**kwargs:12个控制访问的参数
+Requests库的两个重要对象
+r = requests.get(url)
+Response对象包含爬虫返回的内容
+
+Response对象的属性
+r.status_code HTTP请求的返回状态，200表示成功，404表示失败
+r.text HTTP响应的字符串形式，即，url对应的页面内容
+r.encoding 从HTTP header中猜测的响应内容编码方式
+r.apparent_encoding 从内容中分析出的响应内容编码方式（备选编码方式）
+r.content HTTP响应内容的二进制形式
+
+r.encoding: 如果header中不存在charset,则认为编码为ISO-8859-1
+
+理解Requests库的异常
+requests.ConnectionError 网络边接错误异常，如DNS查询失败、拒绝边接等
+requests.HTTPError HTTP错误异常
+requests.URLRequired URL缺失异常
+requests.TooManyRedirects 超过最大重定向次数，产生重定向异常
+requests.ConnectTimeout 连接远程服务器超时异常
+requests.Timeout 请求URL超时，产生超时异常
+r.raise_for_stauts() 如果不是200,产生异常requests.HTTPError
+
+通用代码框架
+import requests
+def getHTMLText(url):
+    tyr:
+	r = requests.get(url, timeout=30)
+	r.raise_for_status() #如果状态不是200,引发HTTPError异常
+	r.encoding = r.apparent_encoding
+	return r.text
+    except:
+	return "产生异常"
+
+if __name__ == "__main__":
+    url = "http://www.baidu.com"
+    print(getHTMLText(url))
+
+HTTP协议对资源的操作
+GET	请求获取URL位置的资源
+HEAD	请求获取URL位置的响应消息报告，即获得该资源的头部信息
+POST	请求向URL位置的资源后附加新的数据
+PUT	请求向URL位置存储一个资源，覆盖URL位置的次源
+PATCH	请求局部更新URL位置的资源，即改变该处资源的部分内容
+DELETE	请求删除URL位置存储的资源
+
+理解PATCH和PUT的区别
+假设URL位置有一组数据UserInfo，包括UserID、UserName等20个字段。
+需求：用户修改了UserName，其他不变。
+采用PATCH，仅向URL提交UserName的局部更新请求。
+采用PUT，发须将所有20个字段一并提交到URL，未提交字段被删除
+PATCH的最主要好处，节省网络带宽
+
+Requests库的post()方法
+payload = {'key1':'value1', 'key2':'value2'}
+r = requests.post('http://httpbin.org/post', data = payload)
+print(r.text)
+
+put()方法可以将原有的数据覆盖掉
+
+requests()方法
+requests.request(method, url, **kwargs)
+method:请求方式，对应get/put/post等7种
+url:拟获取页面的url链接
+**kwargs:控制访问的参数，共13个
+method:请求方式
+r = requests.request('GET', url, **kwargs)
+r = requests.request('HEAD', url, **kwargs) 
+r = requests.request('POST', url, **kwargs)
+r = requests.request('PUT', url, **kwargs)
+r = requests.request('PATCH', url, **kwargs)
+r = requests.request('delete', url, **kwargs)
+r = requests.request('OPTIONS', url, **kwargs)
+
+requests.request(method, url, **kwargs)
+**kwargs:控制访问的参数，均为可选项
+params:字典或字节序列，作为参数增加到url中
+kv = {'key1':'value1', 'key2':'value2'}
+r = requests.request('GET', 'http://python123.io/ws', params=kv)
+print(r.url)
+
+**kwargs:控制访问的参数均为可选项
+data:字典、字节序列或文件对象，作为Request的内容
+kv = {'key1':'value1', 'key2':'value2'}
+r = requests.request('POST','http://python123.io/ws', data=kv)
+body = '主体内容'
+r = requests.request('POST','http://python123.io/ws', data=body)
+
+requests.request(method, url, **kwargs)
+**kwargs:控制访问的参数，均为可选项
+json:JSON格式的数据，作为Request的内容
+kv = {'key1':'value1'}
+r = requests.request('POST','http://python123.io/ws', json=kv)
+
+requests.request(method, url, **kwargs)
+**kwargs:控制访问的参数，均为可选项
+headers:字典，HTTP定制头
+hd = {'user-agent': 'Chrome/10'}
+r = requests.request('POST', 'http://python123.io/ws', headers=hd)
+
+requests.request(method, url, **kwargs)
+**kwargs:控制访问的参数，均为可选项
+cookies:字典或CookieJar, Request中的cookie
+
+auth:元组，支持HTTP认证功能
+
+files:字典类型，传输文件
+fs = {'file': open('data.xls', 'rb')}
+r = requests.request('POST', 'http://python123.io/ws', files=fs)
+
+timeout：设定超时时间，秒为单位
+r = requests.request('GET', 'http://www.baidu.com', timeout=10)
+
+proxies: 字典类型，设定访问代理服务器，可以增加登录认证
+pxs = {'http': 'http://usr:pass@10.10.10.1:1234'
+	'https':'https://10.10.10.1:4321' }
+r = requests.request('GET', 'http://www.baidu.com', proxies=pxs)
+
+allow_redirects: True/False, 默认为True, 重定向开关
+stream: True/False, 默认为True，获取内容立即下载开关
+verify: True/False, 默认为True，认证SSL证书开关
+cert：本地SSL证书路径
+
+requests.get(url, params=None, **kwargs)
+url：拟获取页面的url链接
+params：url中的额外参数，字典或字节流格式，可选
+**kwargs：12个控制访问的参数,request中除proxies外的其他12个
+
+requests.head(url, params=None, **kwargs)
+url：拟获取页面的url链接
+**kwargs：13个控制访问的参数,request中除proxies外的其他12个
+
+
+requests.post(url, data=None, json=None, **kwargs)
+url：拟更新页面的url链接
+data：字典、字节序列或文件，Request的内容
+json：JSON格式的数据，Request的内容
+**kwargs：11个控制访问的参数,request中除proxies外的其他12个
+
+
+requests.put(url, data=None, json=None, **kwargs)
+url：拟更新页面的url链接
+data：字典、字节序列或文件，Request的内容
+**kwargs：12个控制访问的参数
+
+
+requests.patch(url, data=None, **kwargs)
+url：拟更新页面的url链接
+data：字典、字节序列或文件，Request的内容
+**kwargs：12个控制访问的参数
+
+
+requests.delete(url, **kwargs)
+url：拟更新页面的url链接
+**kwargs：13个控制访问的参数
+
+网络爬虫引发的问题
+
+网络爬虫的尺寸
+小规模，数据量小 爬取速度不敏感 Requests库 爬取网页 玩转网页
+中规模，数据规模大 爬取速度敏感 Scrapy库 爬取网站 爬取系列网站
+大规模，搜索引擎 爬取速度关键 定制开发 爬取全网
+
+网络爬虫的“骚扰”
+受限于编写水平和目的，网络爬虫将会为web服务器带来巨大的资源开销
+
+Robots协议
+Robots Exclusion Standard 网络爬虫排除标准
+作用：网站告知哪些可以爬取，哪些不可以爬取
+形式：在网站根目录下的robots.txt文件
+
+User-agent:*
+Disallow:/
+
+User-agent 代表了哪些爬虫
+Disallow:不允许爬虫爬取的目路
+
+robots协议的遵守方式
+网络爬虫：自动或人工识别robots.txt,再进行内容爬取
+约束性：Robots协议是建议但非约束性，网络爬虫可以不遵守，但存在法律风险
+
+对robots协议的理解
+爬取网页 玩转网页：访问量很小：可以遵守 访问量较大：建议遵守
+爬取网站 爬取系列网站 非商业且偶尔：建议遵守 商业利益：必须遵守
+爬取全网 必须遵守
+类人行为可不参考robots协议
+
+实例1：京东商品页面的爬取
+import requests
+url = "https://item.id.com/2967929.html"
+try:
+	r = requests.get(url)
+	r.raise_for_status()
+	r.encoding = r.apparent_encoding
+	print(r.text[:1000])
+except:
+	print('爬取失败')
+
+实例2：亚马逊商品页面的爬取
+import requests
+url='''https://www.amazon.com/Python-Crash-Course-2nd-Edition/
+dp/1593279280'''
+try:
+	kv = {'user-agent':'Mozilla/5.0'}
+	r = requests.get(url, headers=kv)
+	r.raise_for_status()
+	r.encoding = r.apparent_encoding
+	print(r.text[1000:2000])
+except:
+	print('爬取失败')
+
+实例3：百度/360搜索关键词提交
+搜索引擎关键词提交接口
+百度的关键词接口
+http://www.baidu.com/s?wd=keyword
+
+360的关键词接口
+http://www.so.com/s?q=keyword
+
+百度搜索全代码
+import requests
+keyword = "python"
+try:
+	kv = {'wd':keyword}
+	r = requests.get("http://www.baidu.com/s", params=kv)
+	print(r.request.url)
+	r.raise_for_status()
+	print(len(r.text))
+except:
+	print("爬取失败")
+
+360搜索全代码
+import requests
+keyword = "Python"
+try:
+	kv = {'q': keyword}
+	r = requests.get("http://www.so.com/s", params=kv)
+	print(r.request.url)
+	r.raise_for_status()
+	print(len(r.text))
+except:
+	print('爬取失败')
+
+实例4：网络图片的爬取和存储
+
+网络图片的爬取
+网络图片链接的格式
+http://www.example.com/picture.jpg
+国家地理：
+http://www.nationalgeographic.com.cn/
+选择一个图片web页面：
+'''
+https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fup.enterdesk.com%2Fedpic_source%2F0e%2F8c%2F87%2F0e8c87ed7ce98a09e53769b2b9e8aba9.jpg&refer=http%3A%2F%2Fup.enterdesk.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1643806822&t=faa8db6a0996430d5844779147064877
+'''
+import requests
+import os
+url = 
+'''
+https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fup.enterdesk.com%2Fedpic_source%2F0e%2F8c%2F87%2F0e8c87ed7ce98a09e53769b2b9e8aba9.jpg&refer=http%3A%2F%2Fup.enterdesk.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1643806822&t=faa8db6a0996430d5844779147064877
+'''
+root = "/home/hiya"
+path=root+url.split('/')[-1]
+try:
+	if not os.path.exists(root):
+		os.mkdir(root)
+
+	if not os.path.exists(path):
+		r = requests.get(url)
+		with open(path, 'wb') as f:
+			f.write(r.content)
+			f.close()
+			print("文件保存成功")
+	else:
+		print('文件已存在')
+except:
+	print('爬取失败')
+
+实例5：IP地址归属地的自动查询
+www.ip138.com 的搜索框 http://m.ip138/ip.asp?ip=ipaddress
+
+import requests
+url = "http://m.op138.com/ip.asp?ip="
+try:
+	r = requests.get(url + '202.204.80.112')
+	r.raise_for_status()
+	r.encoding = r.apparent_encoding
+	print(r.text[-500:])
+except:
+	print("爬取失败")
+
+Beautiful Soup 库的安装
+Beautiful Soup库的安装小测
+演示HTML页面地址：http://python123.io/ws/demo.html
+
+Beautiful Soup 库的基本元素
+Beautiful Soup 库的理解
+Beautiful Soup 库是解析、遍历、维护、“标签树”的功能库
+from bs4 import BeautifulSoup
+soup = BeautifulSoup("<html>data</html>", "html.parser")
+soup2 = BeautifulSoup(open("D://demo.html"), "html.parser")
+BeautifulSoup对应一个HTML/XML文档的全部内容
+Beautiful Soup 库解析器
+bs4的HTML解析器 BeautifulSoup(mk, 'html.parser') 条件：安装bs4库
+lxml的HTML解析器 BeautifulSoup(mk, 'lxml') 条件：pip install lxml
+lxml的XML解析器 BeautifulSoup(mk, 'xml') 条件：pip install lxml
+html5lib的解析器 BeautifulSoup(mk, 'html5lib') 条件：pip install html5lib
+
+BeautifulSoup 类的基本元素
+Tag 标签，最基本的信息组织单元，分别用<>和</>标明开头和结尾
+Name 标签的名字，<p>...</p>的名字是'p'，格式：<tag>.name
+Attributes 标签的属性，字典形式组织，格式:<tag>.attrs
+NavigableString 标签内非属性字符串，<>...</>中字符串，格式:<tab>.string
+Comment 标签内字符串的注释部分，一种特殊的Comment类型
+
+标签 .<tag>
+名称 .name
+属性 .attrs
+非属性字符串/注释 .string
+
+基于bs4库的HTML内容遍历方法
+
+回顾demo.html
+import requests
+r = requests.get('http://python123.io/ws/deml.html')
+demo = r.text
+demo
+<html><head><title>This is a python demo page</title></head>
+<body>
+<p class="title"><b>The demo python introduces several python courses.</b></p>
+<p class="course">Python is a wonderful general-purpose programming language. You can learn Python from novice to professional by tracking the following courses:
+<a class="py1" href="http://www.icourse163.org/course/BIT-268001" id="link1">Basic Python</a> and <a class="py2" href="http://www.icourse163.org/course/BIT-1001870001" id="link2">Advanced Python</a>.</p>
+</body></html>
+
+标签树的下行遍历
+.contents 子节点的列表，将<tag>所有儿子节点存入列表
+.children 子节点的迭代类型，与.contents类似，用于循环遍历儿子节点
+.descendants 子孙节点的迭代类型，包含所有子孙节点，用于循环遍历
+
+标签树的上行遍历
+soup = BeautifulSoup(demo, "html.parser")
+for parent in soup.a.parents:
+	if parent is None:
+		print(parent)
+	else:
+		print(parent.name)
+
+标签树的平行遍历
+.next_sibling 返回按照HTML文本顺序的下一个平行点标签
+.previous_sibling 返回按照HTML文本的上一个平行节点标签
+.next_siblings 迭代类型，返回按照HTML文本顺序的后续所有平行节点标签
+.previous.siblings 迭代类型，返回按照HTML文本的前续所有平行节点标签
+
+所有的平行遍历必须必生在同一个父节点下的各节点间
+
+下行遍历：
+.contents
+.children
+.descendants
+
+上行遍历：
+.parent
+.parents
+
+平行遍历
+.next_sibling
+.previous_sibling
+.next_siblings
+.previous_siblings
+
+基于bs4库的HTML格式输出
+2:18:56
+import requests
+from bs4 import BeautifulSoup
+r = requests.get('http://python123.io/ws/demo.html')
+demo = r.text
+soup = BeautifulSoup(demo, 'html.parser')
+soup.prettify()
+print(soup.prettify())
+
+信息标记的三种形式
+xml json yaml
+XML eXtensible Markup Language 扩展标记语言
+JSON JavaScript Object Notation JavaScript 面向对像的标记形式
+	有类型的键值对 key:value
+YAML Ain't Markup Language 无类健值对key:avlue
+	| 表达整块数据 #表示注释
+信息的标记
+标记后的信息可形成信息组织结构，增加了信息维度
+标记后的信息可用于通信、存储或展示
+标记的结构与信息一样具有重要价值
+标记后的信息更利于程序理解和运用
+
+HTML的信息标记
+HTML通过预定义的<>...</>标签形式组织不同类型的信息
+2:29:54
+2:32:58
+
+三种信息标记形式的比较
+XML 最早的通用信息标记语言，可扩展性好，但繁琐
+JSON 信息有类型，适合程序处理(js)，较XML简洁
+YAML 信息无类型，文本信息比例最高，可读性好
+
+XML Internet上的信息交互与传递
+JSON 移动应用云端和节点的信息通信，无注释
+YAML 各类系统的配置文件，有注释易读
+
+信息提取的一般方法
+方法一：完整解析信息的标记形式，再提取关键信息
+XML JSON YAML
+需要标记解析器 例如：bs4库的标签树遍历
+优点：信息解析准确
+缺点：提取过程繁琐，速度慢
+
+方法二：无视标记形式，直接搜索关键信息
+搜索
+对信息的文本查找函数即可
+优点：提取过程简洁，速度较快
+缺点：提取结果准确性与信息内容相关
+
+融合方法：结合形式解析与搜索方法，提取关键信息
+XML JSON YAML 搜索
+需要标记解析及文本查找函数
+
+实例
+提取HTML中所有URL链接
+思路：1）搜索到所有<a>标签
+	  2）解析<a>标签格式，提取href后的链接内容
+
+基于bs4库的HTML内容查找方法
+<>.find_all(name, attrs, recursive, string, **kwargs)
+返回一个列表类型，存储查找结果
+name:对标签名称的检索字符串
+attrs:对标签属性值的检索字符串，可标注属性检索
+recursive:是否对子孙全部检索，默认True
+string:<>...</>中字符串区域的检索字符串
+<tag>(...) 等价于<tag>.find_all(..)
+soup(..) 等价于 soup.find_all(..)
+
+扩展方法
+<>.find() 搜索且只返回一个结果，字符串类型，同.find_all()参数
+<>.find_parents() 在先辈节点中搜索，返回列表类型，同.find_all()参数
+<>.find_parent() 在先辈节点中返回一个结果，字符串类型，同.find()参数
+<>.find_next_siblings() 在后续平行节点中搜索，返回列表类型，同.find_all()参数
+<>.find_netxt_sibling() 在后续平行节点中返回一个结果，字符串类型，同.find()参数
+<>.find_previous_siblings()在前序节点中搜索，返回列表类型，同.find_all()参数
+<>.find_previous_sibling() 在前序节点中返回一个结果，字符串类型，同.find()参数
+
+”中国大学排名定向爬虫“实例介绍
+2:58:20
+最好大学网排名网址
+旧网址
+http://www.zuihaodaxue.cn/zuihaodaxuepaiming2016.html
+新网址
+https://www.shanghairanking.cn/rankings/bcur/2021
+功能描述
+输入：大学排名URL链接
+输出：大学排名信息的屏幕输出（排名，大学名称，总分）
+技术路线：requests-bs4
+定向爬虫：仅对输入URL进行爬取，不扩展爬取
+
+
+
+程序的结构设计
+步骤1：从网络上获取大学排名网页内容
+getHTMLText()
+步骤2：提取网页内容中信息到合适的数据结构
+fillUnivList()
+步骤3：利用数据结构展示并输出结果
+printUnivList()
+3:15:20
+

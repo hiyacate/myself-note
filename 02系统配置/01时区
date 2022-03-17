@@ -1,0 +1,15 @@
+查看时区
+#date -R
+修改时区
+#dpkg-reconfigure tzdata
+该操作会修改两个文件
+/etc/timezone #该文本文件可直接修改
+/etc/localtime #该文件可通过软链接修改
+
+手动修改以上两个文件
+#vim /etc/timezone
+Asia/Shanghai
+
+#ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+或
+#cp -a /usr/share/zoneinfo/Asia/Shanghai /etc/localtime

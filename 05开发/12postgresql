@@ -1,0 +1,9 @@
+迁移数据库数据
+pg_dump the_db_name > the_backup.sql
+然后将备份复制到开发服务器，使用以下命令恢复：
+psql the_new_dev_db < the_backup.sql
+
+
+上面命令最近一次没有成功，用下面这个 
+pg_dump -U postgres -d blog > blog.sql
+psql -U postgres -d blog < the_backup.sql

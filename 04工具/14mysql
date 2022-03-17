@@ -1,0 +1,2 @@
+# 关于mysql依赖
+sudo apt install python-dev default-libmysqlclient-dev
