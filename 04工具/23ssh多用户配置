@@ -1,0 +1,13 @@
+# github
+Host sarah
+HostName github.com
+User hiyaSarah
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/sarah/sarah_id_rsa
+
+# github
+Host hiya
+HostName github.com
+User hiyacate
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/hiya/hiya_id_rsa
