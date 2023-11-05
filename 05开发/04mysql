@@ -106,6 +106,13 @@ shell> mysql --host=localhost --port=3306 --user=root --password
 -p参数，用于指定密码
 -p参数后没有空格
 对于密码，=后没有空格
+
+### 创建用户
+CREATE USER <用户> [ IDENTIFIED BY [ PASSWORD ] 'password' ] [ ,用户 [ IDENTIFIED BY [ PASSWORD ] 'password' ]]
+
+例：
+mysql> CREATE USER 'test1'@'localhost' IDENTIFIED BY 'test1';
+
 1.查看当前用户：
 shell> whoami
 2.要断开连接，请按Ctrl+D组合键或键入exit:
